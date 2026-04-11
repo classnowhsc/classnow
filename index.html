@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ClassNow — Premium HSC Courses</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  <link rel="shortcut icon" href="favicon.ico" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+<!-- PARTICLE CANVAS -->
+<canvas id="particles"></canvas>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <div class="nav-logo">
+      <img src="logo-nav.png" class="nav-logo-img" alt="ClassNow Logo" />
+      <span class="brand">Class<span class="accent">Now</span></span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#home" class="nav-link active">Home</a></li>
+      <li><a href="#courses" class="nav-link">Courses</a></li>
+      <li><a href="#contact" class="nav-link">Contact</a></li>
+      <li><a href="classes.html" class="nav-link watch-btn" id="watchBtn">Watch Classes</a></li>
+    </ul>
+    <div class="nav-auth" id="navAuth">
+      <a href="login.html" class="btn-ghost">Login</a>
+      <a href="signup.html" class="btn-primary-sm">Sign Up</a>
+    </div>
+    <div class="nav-user hidden" id="navUser">
+      <span class="user-greeting">Hello, <span id="userName">Student</span></span>
+      <button class="btn-ghost" onclick="logout()">Logout</button>
+    </div>
+    <button class="hamburger" id="hamburger">&#9776;</button>
+  </div>
+  <div class="mobile-menu hidden" id="mobileMenu">
+    <a href="#home">Home</a>
+    <a href="#courses">Courses</a>
+    <a href="#contact">Contact</a>
+    <a href="classes.html">Watch Classes</a>
+    <a href="login.html">Login</a>
+    <a href="signup.html">Sign Up</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-glow"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-badge">🎓 Bangladesh's Smart Learning Platform</div>
+    <h1 class="hero-title">
+      Learn Smarter,<br/>
+      <span class="glitch" data-text="Score Higher">Score Higher</span>
+    </h1>
+    <p class="hero-desc">
+      ClassNow brings you premium HSC &amp; SSC video courses from top educators — 
+      structured, affordable, and available on-demand. Master every subject at your own pace.
+    </p>
+    <div class="hero-cta">
+      <a href="signup.html" class="btn-hero">Start Learning Free</a>
+      <a href="#courses" class="btn-hero-outline">View Courses</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><span class="stat-num">500+</span><span class="stat-label">Students</span></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><span class="stat-num">50+</span><span class="stat-label">Video Classes</span></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><span class="stat-num">6</span><span class="stat-label">Subjects</span></div>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="scene">
+      <div class="cube">
+        <div class="face front">HSC</div>
+        <div class="face back">SSC</div>
+        <div class="face left">📖</div>
+        <div class="face right">🎯</div>
+        <div class="face top">🏆</div>
+        <div class="face bottom">💡</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT SECTION -->
+<section class="about-section">
+  <div class="section-inner">
+    <div class="about-card tilt-card">
+      <div class="about-icon">🚀</div>
+      <div class="about-text">
+        <h2>About ClassNow</h2>
+        <p>
+          ClassNow is a dedicated academic platform built for HSC and SSC Science students in Bangladesh. 
+          Our mission is to make quality education accessible and affordable for every student — 
+          regardless of location or financial background.
+        </p>
+        <p>
+          All courses are taught by experienced educators and delivered via carefully curated YouTube 
+          video lectures. Students get lifetime access, structured playlists, and a clean, distraction-free 
+          learning environment after signing up.
+        </p>
+        <div class="about-tags">
+          <span class="tag">HSC Bangla</span>
+          <span class="tag">HSC English</span>
+          <span class="tag">HSC ICT</span>
+          <span class="tag">HSC Physics</span>
+          <span class="tag">HSC Chemistry</span>
+          <span class="tag">HSC Biology</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RECENT UPLOADS -->
+<section class="recent-section">
+  <div class="section-inner">
+    <div class="section-header">
+      <span class="section-label">🔔 Latest</span>
+      <h2 class="section-title">Recently Uploaded Classes</h2>
+      <p class="section-sub">Fresh content added every week</p>
+    </div>
+    <div class="recent-grid" id="recentGrid">
+      <!-- Filled by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- COURSES SECTION -->
+<section class="courses-section" id="courses">
+  <div class="section-inner">
+    <div class="section-header">
+      <span class="section-label">📚 Courses</span>
+      <h2 class="section-title">Choose Your Course</h2>
+      <p class="section-sub">Structured learning paths for exam success</p>
+    </div>
+    <div class="courses-grid" id="coursesGrid">
+      <!-- Filled by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT SECTION -->
+<section class="contact-section" id="contact">
+  <div class="section-inner">
+    <div class="section-header">
+      <span class="section-label">📬 Contact</span>
+      <h2 class="section-title">Get In Touch</h2>
+    </div>
+    <div class="contact-grid">
+      <div class="contact-card card-3d">
+        <div class="contact-icon">📧</div>
+        <h3>Email</h3>
+        <p>nazmuledu@gmail.com</p>
+      </div>
+      <div class="contact-card card-3d">
+        <div class="contact-icon">📱</div>
+        <h3>Phone / WhatsApp</h3>
+        <p>01684872356</p>
+      </div>
+      <div class="contact-card card-3d">
+        <div class="contact-icon">📘</div>
+        <h3>Facebook</h3>
+        <a href="https://www.facebook.com/share/18S3JXtCBe/" target="_blank" class="contact-link">ClassNow Page</a>
+      </div>
+      <div class="contact-card card-3d">
+        <div class="contact-icon">▶️</div>
+        <h3>YouTube</h3>
+        <a href="https://www.youtube.com/@classnowhsc" target="_blank" class="contact-link">@classnowhsc</a>
+      </div>
+    </div>
+    <div class="footer-note">
+      <p>© 2025 ClassNow. Made with 💙 for HSC students of Bangladesh.</p>
+    </div>
+  </div>
+</section>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

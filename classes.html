@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Classes — ClassNow</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  <link rel="apple-touch-icon" href="logo.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+
+<!-- AUTH GUARD OVERLAY -->
+<div class="locked-overlay" id="lockedOverlay">
+  <div class="lock-icon">🔒</div>
+  <h2 class="lock-title">Classes Are Locked</h2>
+  <p class="lock-sub">You need to be logged in to access the course videos. Join ClassNow for free to start learning!</p>
+  <div class="lock-buttons">
+    <a href="login.html" class="btn-hero">Login</a>
+    <a href="signup.html" class="btn-hero-outline">Sign Up Free</a>
+  </div>
+</div>
+
+<!-- NAVBAR -->
+<nav class="navbar scrolled" id="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo" style="text-decoration:none;">
+      <img src="logo-nav.png" class="nav-logo-img" alt="ClassNow" />
+      <span class="brand">Class<span class="accent">Now</span></span>
+    </a>
+    <ul class="nav-links" style="margin-left:auto;">
+      <li><a href="index.html" class="nav-link">Home</a></li>
+      <li><a href="index.html#courses" class="nav-link">Courses</a></li>
+      <li><a href="classes.html" class="nav-link active">My Classes</a></li>
+    </ul>
+    <div class="nav-user" id="navUser">
+      <span class="user-greeting">Hello, <span id="userName">Student</span></span>
+      <button class="btn-ghost" onclick="logout()">Logout</button>
+    </div>
+  </div>
+</nav>
+
+<!-- CLASSES PAGE -->
+<div class="classes-page" id="classesPage" style="display:none;">
+
+  <!-- COURSE TABS HEADER -->
+  <div class="classes-header">
+    <span class="classes-title">📚 My Classes</span>
+    <div class="course-selector" id="courseTabs">
+      <!-- filled by JS -->
+    </div>
+  </div>
+
+  <!-- LAYOUT: VIDEO + SIDEBAR -->
+  <div class="classes-layout">
+    <!-- VIDEO MAIN -->
+    <div class="video-main">
+      <div class="video-player-wrap" id="videoPlayerWrap">
+        <div class="video-placeholder" id="videoPlaceholder">
+          <span>▶️</span>
+          <p style="font-family:var(--font-body);color:var(--text2);font-size:1rem;">Select a class from the list to start watching</p>
+        </div>
+        <iframe
+          id="videoIframe"
+          style="display:none;"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+        ></iframe>
+      </div>
+      <div class="video-info">
+        <div class="video-now-title" id="videoNowTitle">Choose a lecture to begin</div>
+        <div class="video-now-meta" id="videoNowMeta">ClassNow — Bangladesh's Smart Learning Platform</div>
+      </div>
+    </div>
+
+    <!-- PLAYLIST SIDEBAR -->
+    <div class="playlist-sidebar">
+      <div class="playlist-header">
+        Course Playlist
+        <div class="playlist-count" id="playlistCount">0 lectures</div>
+      </div>
+      <div class="playlist-list" id="playlistList">
+        <!-- filled by JS -->
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+<script>
+// ---- AUTH CHECK ----
+document.addEventListener('DOMContentLoaded', () => {
+  initParticles();
+  const overlay = document.getElementById('lockedOverlay');
+  const page = document.getElementById('classesPage');
+  const navUser = document.getElementById('navUser');
+  const userNameEl = document.getElementById('userName');
+
+  if (!Auth.isLoggedIn()) {
+    overlay.style.display = 'flex';
+    page.style.display = 'none';
+    return;
+  }
+
+  // Logged in
+  overlay.style.display = 'none';
+  page.style.display = 'flex';
+  const user = Auth.currentUser();
+  if (userNameEl) userNameEl.textContent = user.name.split(' ')[0];
+
+  // Determine active course
+  let activeCourseId = localStorage.getItem('cn_active_course') || COURSES[0].id;
+  // Check if there's a video queued from recent classes
+  const queuedVideo = JSON.parse(localStorage.getItem('cn_play_video') || 'null');
+  if (queuedVideo) localStorage.removeItem('cn_play_video');
+
+  renderCourseTabs(activeCourseId);
+  renderPlaylist(activeCourseId, queuedVideo);
+});
+
+function renderCourseTabs(activeId) {
+  const tabs = document.getElementById('courseTabs');
+  tabs.innerHTML = COURSES.map(c => `
+    <button class="course-tab ${c.id === activeId ? 'active' : ''}"
+      onclick="switchCourse('${c.id}')">
+      ${c.icon} ${c.subject}
+    </button>
+  `).join('');
+}
+
+let currentCourseId = null;
+let currentVideoIndex = -1;
+
+function switchCourse(id) {
+  currentCourseId = id;
+  localStorage.setItem('cn_active_course', id);
+  renderCourseTabs(id);
+  renderPlaylist(id, null);
+  // Clear player
+  setVideo(null, null, -1);
+}
+
+function renderPlaylist(courseId, autoPlay) {
+  currentCourseId = courseId;
+  const course = COURSES.find(c => c.id === courseId);
+  if (!course) return;
+
+  const list = document.getElementById('playlistList');
+  const count = document.getElementById('playlistCount');
+  count.textContent = `${course.videos.length} lecture${course.videos.length !== 1 ? 's' : ''}`;
+
+  list.innerHTML = course.videos.map((v, i) => `
+    <div class="playlist-item ${i === 0 && !autoPlay ? '' : ''}" id="pi-${i}" onclick="playVideo(${i})">
+      <div class="playlist-num">${i + 1}</div>
+      <div class="playlist-item-title">${v.title}</div>
+      <div class="playlist-play-icon">▶</div>
+    </div>
+  `).join('');
+
+  // Auto-play if queued video matches
+  if (autoPlay) {
+    const idx = course.videos.findIndex(v => v.videoId === autoPlay.videoId);
+    if (idx >= 0) { playVideo(idx); return; }
+  }
+  // Auto-play first
+  playVideo(0);
+}
+
+function playVideo(index) {
+  const course = COURSES.find(c => c.id === currentCourseId);
+  if (!course || !course.videos[index]) return;
+
+  // Update active state
+  document.querySelectorAll('.playlist-item').forEach((el, i) => {
+    el.classList.toggle('active', i === index);
+  });
+  // Scroll into view
+  const activeEl = document.getElementById(`pi-${index}`);
+  if (activeEl) activeEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+
+  currentVideoIndex = index;
+  const vid = course.videos[index];
+  setVideo(vid.videoId, vid.title, index);
+}
+
+function setVideo(videoId, title, index) {
+  const placeholder = document.getElementById('videoPlaceholder');
+  const iframe = document.getElementById('videoIframe');
+  const titleEl = document.getElementById('videoNowTitle');
+  const metaEl = document.getElementById('videoNowMeta');
+
+  if (!videoId) {
+    placeholder.style.display = 'flex';
+    iframe.style.display = 'none';
+    titleEl.textContent = 'Choose a lecture to begin';
+    metaEl.textContent = 'ClassNow — Bangladesh\'s Smart Learning Platform';
+    return;
+  }
+
+  placeholder.style.display = 'none';
+  iframe.style.display = 'block';
+  iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1`;
+  titleEl.textContent = title || 'Now Playing';
+  const course = COURSES.find(c => c.id === currentCourseId);
+  metaEl.textContent = `${course ? course.title : ''} · Lecture ${index + 1}`;
+}
+</script>
+</body>
+</html>
