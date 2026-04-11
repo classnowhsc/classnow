@@ -41,12 +41,19 @@
     <button class="hamburger" id="hamburger">&#9776;</button>
   </div>
   <div class="mobile-menu hidden" id="mobileMenu">
-    <a href="#home">Home</a>
-    <a href="#courses">Courses</a>
-    <a href="#contact">Contact</a>
-    <a href="classes.html">Watch Classes</a>
-    <a href="login.html">Login</a>
-    <a href="signup.html">Sign Up</a>
+    <a href="#home" onclick="closeMobileMenu()">🏠 Home</a>
+    <a href="#courses" onclick="closeMobileMenu()">📚 Courses</a>
+    <a href="#contact" onclick="closeMobileMenu()">📬 Contact</a>
+    <a href="classes.html" class="mob-watch">▶ Watch Classes</a>
+    <div class="mob-divider"></div>
+    <div id="mobAuthLinks">
+      <a href="login.html" class="mob-login">Login</a>
+      <a href="signup.html" class="mob-signup">Sign Up Free</a>
+    </div>
+    <div id="mobUserLinks" style="display:none; flex-direction:column; gap:4px;">
+      <div class="mob-user">👋 Hello, <span id="mobUserName">Student</span></div>
+      <a href="javascript:void(0)" class="mob-logout" onclick="logout()">🚪 Logout</a>
+    </div>
   </div>
 </nav>
 
@@ -160,7 +167,7 @@
       <div class="contact-card card-3d">
         <div class="contact-icon">📧</div>
         <h3>Email</h3>
-        <p><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="4d232c372038212829380d2a202c2421632e2220">nazmuledu@gmail.com</a></p>
+        <p><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="4d232c372038212829380d2a202c2421632e2220">[email&#160;protected]</a></p>
       </div>
       <div class="contact-card card-3d">
         <div class="contact-icon">📱</div>
@@ -175,8 +182,8 @@
       <div class="contact-card card-3d">
         <div class="contact-icon">▶️</div>
         <h3>YouTube</h3>
-        <a href="http://www.youtube.com/@classnowhsc" target="_blank" class="contact-link">Class Now</a>
+        <a href="http://www.youtube.com/@NazmulsBioCare" target="_blank" class="contact-link">@NazmulsBioCare</a>
       </div>
     </div>
     <div class="footer-note">
-      <p>© 2026 ClassNow. Made with 💙 for HSC students of Bangladesh
+      <p>© 2025 ClassNow. Made with 💙 for HSC students of Bangl
