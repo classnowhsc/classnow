@@ -644,3 +644,153 @@ body {
   .courses-grid { grid-template-columns: 1fr; }
   .recent-grid { grid-template-columns: 1fr; }
 }
+
+/* =====================================================
+   MOBILE FIXES v3
+   ===================================================== */
+
+/* --- HAMBURGER always visible on mobile --- */
+@media (max-width: 768px) {
+  .hamburger {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 42px; height: 42px;
+    background: rgba(0,198,255,0.08);
+    border: 1px solid rgba(0,198,255,0.25) !important;
+    border-radius: 10px;
+    color: var(--accent) !important;
+    font-size: 1.3rem !important;
+    cursor: pointer;
+    margin-left: auto;
+    flex-shrink: 0;
+    z-index: 1001;
+    transition: var(--transition);
+  }
+  .hamburger:hover { background: rgba(0,198,255,0.15); }
+
+  /* Hide desktop nav items */
+  .nav-links { display: none !important; }
+  .nav-auth  { display: none !important; }
+  .nav-user  { display: none !important; }
+
+  /* Mobile menu panel */
+  .mobile-menu {
+    position: absolute;
+    top: 70px; left: 0; right: 0;
+    background: rgba(5,13,26,0.98);
+    backdrop-filter: blur(24px);
+    border-bottom: 1px solid var(--border2);
+    padding: 16px 20px 24px;
+    display: flex !important;
+    flex-direction: column;
+    gap: 4px;
+    z-index: 999;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+  }
+  .mobile-menu.hidden { display: none !important; }
+
+  .mobile-menu a {
+    color: var(--text2);
+    text-decoration: none;
+    font-family: var(--font-body);
+    font-size: 1.05rem;
+    font-weight: 500;
+    padding: 13px 16px;
+    border-radius: var(--radius-sm);
+    border-bottom: none !important;
+    transition: var(--transition);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .mobile-menu a:hover {
+    color: var(--accent);
+    background: rgba(0,198,255,0.08);
+  }
+  .mobile-menu .mob-watch {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff !important;
+    font-weight: 600 !important;
+    border-radius: var(--radius-sm);
+    margin-top: 8px;
+    text-align: center;
+    justify-content: center;
+  }
+  .mobile-menu .mob-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 8px 0;
+  }
+  .mobile-menu .mob-login {
+    border: 1px solid var(--border2);
+    color: var(--text) !important;
+    justify-content: center;
+    margin-top: 4px;
+  }
+  .mobile-menu .mob-signup {
+    background: rgba(0,198,255,0.1);
+    border: 1px solid rgba(0,198,255,0.3);
+    color: var(--accent) !important;
+    font-weight: 600 !important;
+    justify-content: center;
+  }
+  /* Logged-in mobile menu items */
+  .mobile-menu .mob-user {
+    color: var(--accent) !important;
+    font-weight: 600 !important;
+    font-size: 0.9rem;
+    padding: 10px 16px;
+    background: rgba(0,198,255,0.05);
+    border-radius: var(--radius-sm);
+  }
+  .mobile-menu .mob-logout {
+    border: 1px solid rgba(255,80,80,0.3);
+    color: #ff8080 !important;
+    justify-content: center;
+  }
+
+  /* Hero mobile */
+  .hero { padding: 90px 16px 50px; }
+  .hero-content { margin-left: 0; max-width: 100%; }
+  .hero-title { font-size: clamp(1.9rem, 8vw, 3rem); }
+  .hero-desc { font-size: 0.95rem; }
+  .hero-stats { gap: 16px; flex-wrap: wrap; }
+  .stat-num { font-size: 1.4rem; }
+
+  /* Section padding */
+  .section-inner { padding: 60px 16px; }
+
+  /* About card */
+  .about-card { flex-direction: column; padding: 24px 20px; gap: 20px; }
+  .about-text h2 { font-size: 1.4rem; }
+
+  /* Grids */
+  .recent-grid { grid-template-columns: 1fr; gap: 16px; }
+  .courses-grid { grid-template-columns: 1fr; gap: 16px; }
+  .contact-grid { grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  /* Classes page mobile */
+  .classes-header { padding: 14px 16px; gap: 12px; top: 70px; }
+  .classes-title { font-size: 0.95rem; }
+  .course-tab { padding: 6px 12px; font-size: 0.78rem; }
+  .classes-layout { flex-direction: column; }
+  .video-main { padding: 16px; }
+  .playlist-sidebar {
+    width: 100% !important;
+    height: auto !important;
+    position: static !important;
+    border-left: none;
+    border-top: 1px solid var(--border);
+    max-height: 320px;
+  }
+
+  /* Auth cards */
+  .auth-card { padding: 28px 20px; margin: 0 8px; }
+  .auth-title { font-size: 1.2rem; }
+}
+
+@media (max-width: 400px) {
+  .contact-grid { grid-template-columns: 1fr; }
+  .hero-cta { flex-direction: column; }
+  .btn-hero, .btn-hero-outline { text-align: center; width: 100%; }
+  .stat-divider { display: none; }
+}
