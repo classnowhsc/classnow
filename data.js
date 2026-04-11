@@ -59,7 +59,7 @@ const COURSES = [
     color: "#ff6b35",
     colorDark: "#cc4400",
     videos: [
-      { title: "Bangla 1st Paper – Kobita: Shono Ekti Mujiborer Theke (Lec 1)", videoId: "dQw4w9WgXcQ" },
+      { title: "Bangla 1st Paper – Kobita: যৌবনের গান ও বিদ্রোহী", videoId: "PSNvv1z1VBg" },
       { title: "Bangla 1st Paper – Golpo: Aat Kudi Bochor Aage (Lec 2)", videoId: "dQw4w9WgXcQ" },
       { title: "Bangla 2nd Paper – Rachana: Borsho (Lec 3)", videoId: "dQw4w9WgXcQ" },
       { title: "Bangla 2nd Paper – Vyakoron: Sandhi (Lec 4)", videoId: "dQw4w9WgXcQ" },
