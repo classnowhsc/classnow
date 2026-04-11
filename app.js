@@ -1,35 +1,95 @@
 // ============================================================
 //  APP.JS — Auth + 3D Engine + Particles + Homepage
+//  v3 — Persistent login + single device per account
 // ============================================================
 
-/* ---- AUTH BACKEND ---- */
+/* ================================================================
+   AUTH BACKEND
+   - Uses localStorage for persistent login (survives browser close)
+   - Generates a unique deviceToken per login/signup
+   - Only the LATEST deviceToken is valid → logs out older sessions
+   ================================================================ */
 const Auth = {
-  getUsers()  { return JSON.parse(localStorage.getItem('cn_users') || '[]'); },
-  saveUsers(u){ localStorage.setItem('cn_users', JSON.stringify(u)); },
-  getSession(){ return JSON.parse(sessionStorage.getItem('cn_session') || 'null'); },
-  saveSession(u){ sessionStorage.setItem('cn_session', JSON.stringify(u)); },
-  clearSession(){ sessionStorage.removeItem('cn_session'); },
+  getUsers()   { return JSON.parse(localStorage.getItem('cn_users') || '[]'); },
+  saveUsers(u) { localStorage.setItem('cn_users', JSON.stringify(u)); },
+
+  // Session stored in localStorage so it persists after browser close
+  getSession() { return JSON.parse(localStorage.getItem('cn_session') || 'null'); },
+  saveSession(u) { localStorage.setItem('cn_session', JSON.stringify(u)); },
+  clearSession() { localStorage.removeItem('cn_session'); },
+
+  // Generate a random device token
+  genToken() {
+    return Math.random().toString(36).slice(2) + Date.now().toString(36) + Math.random().toString(36).slice(2);
+  },
 
   register(name, email, password) {
     const users = this.getUsers();
     if (users.find(u => u.email === email)) return { ok: false, msg: 'Email already registered.' };
-    const user = { id: Date.now(), name, email, password: btoa(password), joinedAt: new Date().toISOString() };
-    users.push(user); this.saveUsers(users);
-    this.saveSession({ id: user.id, name, email });
+    const deviceToken = this.genToken();
+    const user = {
+      id: Date.now(),
+      name, email,
+      password: btoa(password),
+      deviceToken,          // only this token is valid
+      joinedAt: new Date().toISOString()
+    };
+    users.push(user);
+    this.saveUsers(users);
+    this.saveSession({ id: user.id, name, email, deviceToken });
     return { ok: true };
   },
+
   login(email, password) {
-    const user = this.getUsers().find(u => u.email === email && u.password === btoa(password));
-    if (!user) return { ok: false, msg: 'Incorrect email or password.' };
-    this.saveSession({ id: user.id, name: user.name, email: user.email });
-    return { ok: true, user };
+    const users = this.getUsers();
+    const idx = users.findIndex(u => u.email === email && u.password === btoa(password));
+    if (idx === -1) return { ok: false, msg: 'Incorrect email or password.' };
+
+    // Generate NEW token → invalidates all other devices
+    const deviceToken = this.genToken();
+    users[idx].deviceToken = deviceToken;
+    this.saveUsers(users);
+    this.saveSession({ id: users[idx].id, name: users[idx].name, email, deviceToken });
+    return { ok: true, user: users[idx] };
   },
-  isLoggedIn() { return !!this.getSession(); },
-  currentUser() { return this.getSession(); }
+
+  logout() {
+    const session = this.getSession();
+    if (session) {
+      // Clear token from user record too
+      const users = this.getUsers();
+      const idx = users.findIndex(u => u.id === session.id);
+      if (idx !== -1) {
+        users[idx].deviceToken = null;
+        this.saveUsers(users);
+      }
+    }
+    this.clearSession();
+  },
+
+  // Check if session is valid AND token matches stored token
+  isLoggedIn() {
+    const session = this.getSession();
+    if (!session) return false;
+    const users = this.getUsers();
+    const user = users.find(u => u.id === session.id);
+    if (!user) return false;
+    // If token mismatch → another device logged in → force logout
+    if (user.deviceToken !== session.deviceToken) {
+      this.clearSession();
+      return false;
+    }
+    return true;
+  },
+
+  currentUser() {
+    if (!this.isLoggedIn()) return null;
+    return this.getSession();
+  }
 };
 
 function logout() {
-  Auth.clearSession();
+  Auth.logout();
   showToast('Logged out successfully.', 'success');
   setTimeout(() => location.href = 'index.html', 900);
 }
@@ -77,7 +137,7 @@ function initParticles() {
     const n = Math.min(90, Math.floor(W * H / 10000));
     pts = Array.from({ length: n }, () => ({
       x: Math.random() * W, y: Math.random() * H,
-      z: Math.random(), // depth
+      z: Math.random(),
       vx: (Math.random() - 0.5) * 0.35,
       vy: (Math.random() - 0.5) * 0.35,
       r: Math.random() * 1.5 + 0.4,
@@ -91,14 +151,12 @@ function initParticles() {
   const draw = () => {
     ctx.clearRect(0, 0, W, H);
     pts.forEach((p, i) => {
-      // Subtle mouse attraction
       const dx = mouse.x - p.x, dy = mouse.y - p.y;
       const dist = Math.sqrt(dx*dx + dy*dy);
       if (dist < 160) {
         p.vx += dx / dist * 0.012;
         p.vy += dy / dist * 0.012;
       }
-      // Dampen
       p.vx *= 0.98; p.vy *= 0.98;
       p.x += p.vx; p.y += p.vy;
       if (p.x < 0 || p.x > W) p.vx *= -1;
@@ -110,7 +168,6 @@ function initParticles() {
       ctx.fillStyle = `rgba(0,198,255,${alpha})`;
       ctx.fill();
 
-      // Lines to neighbours
       for (let j = i + 1; j < pts.length; j++) {
         const q = pts[j];
         const d = Math.hypot(p.x - q.x, p.y - q.y);
@@ -134,14 +191,13 @@ function initParticles() {
 }
 
 /* ================================================================
-   3D TILT ENGINE — mouse-tracked per card
+   3D TILT ENGINE
    ================================================================ */
 function initTiltCards() {
-  const TILT_MAX = 18; // max degrees
+  const TILT_MAX = 18;
   const SCALE = 1.04;
 
   document.querySelectorAll('.tilt-card').forEach(card => {
-    // Add shine overlay if not present
     if (!card.querySelector('.card-shine')) {
       const shine = document.createElement('div');
       shine.className = 'card-shine';
@@ -155,7 +211,6 @@ function initTiltCards() {
       const cy = rect.top + rect.height / 2;
       const dx = (e.clientX - cx) / (rect.width / 2);
       const dy = (e.clientY - cy) / (rect.height / 2);
-
       const rotY =  dx * TILT_MAX;
       const rotX = -dy * TILT_MAX;
 
@@ -163,7 +218,6 @@ function initTiltCards() {
       card.style.boxShadow = `${-rotY * 1.5}px ${rotX * 1.5}px 50px rgba(0,0,0,0.5), 0 0 40px rgba(0,198,255,0.15)`;
       card.style.transition = 'transform 0.08s ease, box-shadow 0.08s ease';
 
-      // Move shine to follow cursor
       const shine = card.querySelector('.card-shine');
       if (shine) {
         const px = ((e.clientX - rect.left) / rect.width) * 100;
@@ -279,7 +333,6 @@ function enrollCourse(id) {
   location.href = 'classes.html';
 }
 
-/* ---- CONTACT CARDS TILT ---- */
 function initContactTilt() {
   document.querySelectorAll('.contact-card').forEach(el => {
     el.classList.add('tilt-card');
@@ -288,7 +341,7 @@ function initContactTilt() {
 }
 
 /* ================================================================
-   SMOOTH SCROLL NAV LINKS
+   SMOOTH SCROLL
    ================================================================ */
 document.querySelectorAll('a[href^="#"]').forEach(a => {
   a.addEventListener('click', e => {
@@ -331,7 +384,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initContactTilt();
   initScrollReveal();
 
-  // Add reveal classes to about + contact cards
   document.querySelector('.about-card')?.classList.add('reveal');
   document.querySelectorAll('.contact-card').forEach((el, i) => {
     el.classList.add('reveal', `reveal-delay-${i+1}`);
