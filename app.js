@@ -1,26 +1,37 @@
 // ============================================================
 //  APP.JS — Auth + 3D Engine + Particles + Homepage
-//  v3 — Persistent login + single device per account
+//  v4 — Persistent login + latest device wins
 // ============================================================
 
 /* ================================================================
    AUTH BACKEND
-   - Uses localStorage for persistent login (survives browser close)
-   - Generates a unique deviceToken per login/signup
-   - Only the LATEST deviceToken is valid → logs out older sessions
+   
+   HOW CROSS-DEVICE SINGLE-SESSION WORKS:
+   - Each user record stores a "deviceToken" in localStorage (users DB)
+   - When you log in, a new token is generated and saved to the user record
+   - Your session also stores that token
+   - On EVERY page load, your session token is compared to the stored token
+   - If another device logged in later → their token overwrote yours
+   - Your old token no longer matches → you get auto logged out
+   - The LATEST login always wins ✅
+   
+   NOTE: Since localStorage is per-browser, cross-device sync works
+   because all users share the same users DB key on the same domain.
+   Both devices read/write to the SAME localStorage on classnow.iampro.top
    ================================================================ */
+
 const Auth = {
   getUsers()   { return JSON.parse(localStorage.getItem('cn_users') || '[]'); },
   saveUsers(u) { localStorage.setItem('cn_users', JSON.stringify(u)); },
 
-  // Session stored in localStorage so it persists after browser close
+  // Session in localStorage → persists after browser close
   getSession() { return JSON.parse(localStorage.getItem('cn_session') || 'null'); },
-  saveSession(u) { localStorage.setItem('cn_session', JSON.stringify(u)); },
+  saveSession(s) { localStorage.setItem('cn_session', JSON.stringify(s)); },
   clearSession() { localStorage.removeItem('cn_session'); },
 
-  // Generate a random device token
+  // Generate unique device token
   genToken() {
-    return Math.random().toString(36).slice(2) + Date.now().toString(36) + Math.random().toString(36).slice(2);
+    return btoa(Math.random().toString(36) + Date.now() + Math.random().toString(36)).replace(/=/g,'');
   },
 
   register(name, email, password) {
@@ -31,11 +42,12 @@ const Auth = {
       id: Date.now(),
       name, email,
       password: btoa(password),
-      deviceToken,          // only this token is valid
+      deviceToken,   // latest valid token
       joinedAt: new Date().toISOString()
     };
     users.push(user);
     this.saveUsers(users);
+    // Save session with token
     this.saveSession({ id: user.id, name, email, deviceToken });
     return { ok: true };
   },
@@ -45,10 +57,12 @@ const Auth = {
     const idx = users.findIndex(u => u.email === email && u.password === btoa(password));
     if (idx === -1) return { ok: false, msg: 'Incorrect email or password.' };
 
-    // Generate NEW token → invalidates all other devices
+    // Generate new token — this KICKS OUT any previously logged-in device
     const deviceToken = this.genToken();
-    users[idx].deviceToken = deviceToken;
+    users[idx].deviceToken = deviceToken;  // overwrite old token
     this.saveUsers(users);
+
+    // Save new session
     this.saveSession({ id: users[idx].id, name: users[idx].name, email, deviceToken });
     return { ok: true, user: users[idx] };
   },
@@ -56,7 +70,7 @@ const Auth = {
   logout() {
     const session = this.getSession();
     if (session) {
-      // Clear token from user record too
+      // Invalidate token in user record
       const users = this.getUsers();
       const idx = users.findIndex(u => u.id === session.id);
       if (idx !== -1) {
@@ -67,15 +81,15 @@ const Auth = {
     this.clearSession();
   },
 
-  // Check if session is valid AND token matches stored token
   isLoggedIn() {
     const session = this.getSession();
     if (!session) return false;
+    // Check if token still matches (no other device logged in after us)
     const users = this.getUsers();
     const user = users.find(u => u.id === session.id);
-    if (!user) return false;
-    // If token mismatch → another device logged in → force logout
+    if (!user) { this.clearSession(); return false; }
     if (user.deviceToken !== session.deviceToken) {
+      // Another device logged in — our session is now invalid
       this.clearSession();
       return false;
     }
@@ -92,6 +106,29 @@ function logout() {
   Auth.logout();
   showToast('Logged out successfully.', 'success');
   setTimeout(() => location.href = 'index.html', 900);
+}
+
+/* ================================================================
+   AUTO-KICK CHECK — runs on every page load
+   If this device was kicked by another login, redirect to login page
+   ================================================================ */
+function checkSessionValidity() {
+  const session = localStorage.getItem('cn_session');
+  if (!session) return; // not logged in, nothing to check
+
+  const parsed = JSON.parse(session);
+  const users = JSON.parse(localStorage.getItem('cn_users') || '[]');
+  const user = users.find(u => u.id === parsed.id);
+
+  if (!user || user.deviceToken !== parsed.deviceToken) {
+    // Kicked out — clear session and notify
+    localStorage.removeItem('cn_session');
+    // Only redirect if on a protected page
+    if (window.location.pathname.includes('classes.html')) {
+      alert('⚠️ Your account was logged in from another device. You have been logged out.');
+      window.location.href = 'login.html';
+    }
+  }
 }
 
 /* ---- NAV AUTH STATE ---- */
@@ -377,6 +414,7 @@ function fmtDate(d) {
    INIT
    ================================================================ */
 document.addEventListener('DOMContentLoaded', () => {
+  checkSessionValidity(); // check if kicked by another device
   initNavAuth();
   initParticles();
   renderRecent();
