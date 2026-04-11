@@ -32,6 +32,16 @@ const RECENT_CLASSES = [
     thumb: "https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
     videoId: "dQw4w9WgXcQ",
     isNew: false
+  },
+  {
+    id: 4,
+    title: "HSC Higher Math – Integration (Lec 1)",
+    subject: "HSC Higher Math",
+    lecturer: "Nazmul",
+    date: "2025-04-10",
+    thumb: "https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
+    videoId: "dQw4w9WgXcQ",
+    isNew: true
   }
 ];
 
@@ -94,6 +104,27 @@ const COURSES = [
       { title: "ICT Chapter 3 – Number System (Lec 3)", videoId: "dQw4w9WgXcQ" },
       { title: "ICT Chapter 4 – Web Design (Lec 4)", videoId: "dQw4w9WgXcQ" },
       { title: "ICT Chapter 5 – Programming C (Lec 5)", videoId: "dQw4w9WgXcQ" }
+    ]
+  },
+  {
+    id: "hsc-higher-math",
+    title: "HSC Higher Math Full Course",
+    subject: "Higher Math",
+    description: "Complete Higher Mathematics — algebra, calculus, integration, matrices, vectors and more.",
+    price: 449,
+    originalPrice: 899,
+    lectures: 55,
+    duration: "70 hrs",
+    icon: "∑",
+    color: "#06b6d4",
+    colorDark: "#0e7490",
+    videos: [
+      { title: "Higher Math – Matrix & Determinant (Lec 1)", videoId: "dQw4w9WgXcQ" },
+      { title: "Higher Math – Vectors (Lec 2)", videoId: "dQw4w9WgXcQ" },
+      { title: "Higher Math – Trigonometry (Lec 3)", videoId: "dQw4w9WgXcQ" },
+      { title: "Higher Math – Differentiation (Lec 4)", videoId: "dQw4w9WgXcQ" },
+      { title: "Higher Math – Integration (Lec 5)", videoId: "dQw4w9WgXcQ" },
+      { title: "Higher Math – Complex Numbers (Lec 6)", videoId: "dQw4w9WgXcQ" }
     ]
   },
   {
