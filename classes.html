@@ -8,12 +8,331 @@
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
   <link rel="apple-touch-icon" href="logo.png" />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <style>
+    /* ── CLASSES PAGE LAYOUT ── */
+    .classes-page { display: flex; flex-direction: column; min-height: 100vh; padding-top: 70px; }
+
+    /* Top bar */
+    .classes-topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 70px; z-index: 50;
+      backdrop-filter: blur(20px);
+      gap: 12px; flex-wrap: wrap;
+    }
+    .classes-topbar-left { display: flex; align-items: center; gap: 12px; }
+    .topbar-title {
+      font-family: var(--font-display); font-weight: 800;
+      font-size: 1rem; color: #fff; letter-spacing: 1px;
+    }
+    .topbar-subject {
+      font-family: var(--font-body); font-size: 0.85rem;
+      color: var(--accent); font-weight: 600;
+      background: rgba(0,198,255,0.1); border: 1px solid rgba(0,198,255,0.25);
+      padding: 4px 12px; border-radius: 100px;
+    }
+    .topbar-user {
+      display: flex; align-items: center; gap: 10px;
+      margin-left: auto;
+    }
+    .topbar-user span { font-family: var(--font-body); font-size: 0.85rem; color: var(--text2); }
+    .topbar-user span b { color: var(--accent); }
+
+    /* Main 3-column layout */
+    .classes-body {
+      display: flex; flex: 1;
+      max-width: 1600px; width: 100%; margin: 0 auto;
+    }
+
+    /* ── LEFT SIDEBAR: Subject list ── */
+    .subject-sidebar {
+      width: 220px; flex-shrink: 0;
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      height: calc(100vh - 130px);
+      position: sticky; top: 130px;
+      overflow-y: auto; overflow-x: hidden;
+      display: flex; flex-direction: column;
+    }
+    .subject-sidebar::-webkit-scrollbar { width: 3px; }
+    .subject-sidebar::-webkit-scrollbar-thumb { background: var(--border2); }
+
+    .subject-header {
+      padding: 16px 16px 10px;
+      font-family: var(--font-display); font-size: 0.72rem;
+      font-weight: 700; color: var(--text3);
+      letter-spacing: 2px; text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .subject-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: var(--transition);
+      border-left: 3px solid transparent;
+      position: relative;
+    }
+    .subject-item:hover { background: rgba(0,198,255,0.05); }
+    .subject-item.active {
+      background: rgba(0,198,255,0.08);
+      border-left-color: var(--accent);
+    }
+    .subject-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+      transition: var(--transition);
+    }
+    .subject-item.active .subject-icon {
+      box-shadow: 0 0 12px rgba(0,198,255,0.4);
+    }
+    .subject-info { flex: 1; min-width: 0; }
+    .subject-name {
+      font-family: var(--font-body); font-size: 0.85rem;
+      font-weight: 600; color: var(--text2);
+      line-height: 1.3; white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis;
+    }
+    .subject-item.active .subject-name { color: var(--text); }
+    .subject-count {
+      font-family: var(--font-text); font-size: 0.7rem;
+      color: var(--text3); margin-top: 2px;
+    }
+
+    /* ── CENTER: Video player ── */
+    .video-area {
+      flex: 1; min-width: 0;
+      display: flex; flex-direction: column;
+      background: var(--bg);
+    }
+
+    .video-wrap {
+      width: 100%;
+      background: #000;
+      position: relative;
+    }
+    .video-wrap-inner {
+      width: 100%;
+      aspect-ratio: 16/9;
+      position: relative;
+      background: #000;
+    }
+    .video-wrap-inner iframe {
+      width: 100%; height: 100%; border: none; display: block;
+    }
+    .video-placeholder-center {
+      width: 100%; height: 100%;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      background: var(--bg2); gap: 16px;
+      position: absolute; inset: 0;
+    }
+    .vpc-icon { font-size: 5rem; filter: drop-shadow(0 0 30px rgba(0,198,255,0.5)); }
+    .vpc-text {
+      font-family: var(--font-display); font-size: 1rem;
+      color: var(--text2); text-align: center; max-width: 300px;
+      line-height: 1.6;
+    }
+    .vpc-sub { font-family: var(--font-text); font-size: 0.85rem; color: var(--text3); }
+
+    /* Video info bar */
+    .video-info-bar {
+      padding: 16px 20px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .vid-title {
+      font-family: var(--font-display); font-size: 1.05rem;
+      font-weight: 700; color: #fff; margin-bottom: 6px;
+      line-height: 1.4;
+    }
+    .vid-meta {
+      display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    }
+    .vid-meta span {
+      font-family: var(--font-text); font-size: 0.8rem;
+      color: var(--text3); display: flex; align-items: center; gap: 5px;
+    }
+    .vid-badge {
+      padding: 3px 10px; border-radius: 100px;
+      font-family: var(--font-body); font-size: 0.72rem;
+      font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+      background: rgba(0,198,255,0.1); border: 1px solid rgba(0,198,255,0.3);
+      color: var(--accent);
+    }
+
+    /* Announcements marquee */
+    .announce-bar {
+      background: rgba(0,198,255,0.05);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 20px;
+      display: flex; align-items: center; gap: 12px;
+      overflow: hidden;
+    }
+    .announce-label {
+      font-family: var(--font-display); font-size: 0.7rem;
+      font-weight: 700; color: var(--accent);
+      letter-spacing: 1px; text-transform: uppercase;
+      flex-shrink: 0; padding: 3px 10px;
+      background: rgba(0,198,255,0.12);
+      border-radius: 4px;
+    }
+    .announce-text {
+      font-family: var(--font-body); font-size: 0.85rem;
+      color: var(--text2); white-space: nowrap;
+      animation: marqueeScroll 20s linear infinite;
+    }
+    @keyframes marqueeScroll {
+      from { transform: translateX(100%); }
+      to   { transform: translateX(-100%); }
+    }
+
+    /* ── RIGHT SIDEBAR: Playlist ── */
+    .playlist-sidebar {
+      width: 320px; flex-shrink: 0;
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      height: calc(100vh - 130px);
+      position: sticky; top: 130px;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .playlist-top {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .playlist-top-title {
+      font-family: var(--font-display); font-size: 0.78rem;
+      font-weight: 700; color: var(--text2);
+      letter-spacing: 1.5px; text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .playlist-progress {
+      height: 3px; background: var(--border);
+      border-radius: 3px; overflow: hidden;
+      margin-top: 8px;
+    }
+    .playlist-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 3px; transition: width 0.4s ease;
+    }
+    .playlist-progress-text {
+      font-family: var(--font-text); font-size: 0.72rem;
+      color: var(--text3); margin-top: 5px;
+    }
+    .playlist-scroll {
+      flex: 1; overflow-y: auto; padding: 8px;
+    }
+    .playlist-scroll::-webkit-scrollbar { width: 3px; }
+    .playlist-scroll::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+    .playlist-item {
+      display: flex; gap: 12px; align-items: flex-start;
+      padding: 12px 10px; border-radius: 10px;
+      cursor: pointer; transition: var(--transition);
+      margin-bottom: 2px; position: relative;
+      border: 1px solid transparent;
+    }
+    .playlist-item:hover { background: rgba(0,198,255,0.05); border-color: rgba(0,198,255,0.08); }
+    .playlist-item.active {
+      background: rgba(0,198,255,0.08);
+      border-color: rgba(0,198,255,0.2);
+    }
+    .playlist-item.active::before {
+      content: ''; position: absolute; left: 0; top: 50%;
+      transform: translateY(-50%);
+      width: 3px; height: 60%;
+      background: linear-gradient(var(--accent), var(--accent2));
+      border-radius: 0 3px 3px 0;
+    }
+    .pl-num-wrap {
+      width: 32px; height: 32px; flex-shrink: 0;
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      background: var(--surface2);
+      font-family: var(--font-display); font-size: 0.7rem;
+      font-weight: 700; color: var(--text3);
+      transition: var(--transition);
+    }
+    .playlist-item.active .pl-num-wrap {
+      background: rgba(0,198,255,0.15);
+      color: var(--accent);
+    }
+    .pl-playing { display: none; }
+    .playlist-item.active .pl-playing { display: block; }
+    .playlist-item.active .pl-num { display: none; }
+
+    .pl-info { flex: 1; min-width: 0; }
+    .pl-title {
+      font-family: var(--font-body); font-size: 0.88rem;
+      color: var(--text2); line-height: 1.4;
+      transition: var(--transition);
+    }
+    .playlist-item.active .pl-title { color: var(--text); font-weight: 600; }
+    .pl-meta {
+      font-family: var(--font-text); font-size: 0.72rem;
+      color: var(--text3); margin-top: 3px;
+    }
+
+    /* Auth overlay */
+    .locked-overlay {
+      position: fixed; inset: 0; background: rgba(2,8,16,0.97);
+      display: flex; align-items: center; justify-content: center; z-index: 999;
+      flex-direction: column; gap: 24px; text-align: center; padding: 24px;
+      backdrop-filter: blur(10px);
+    }
+    .lock-icon { font-size: 5rem; animation: lockPulse 2s ease-in-out infinite; }
+    @keyframes lockPulse { 0%,100%{transform:scale(1)rotate(0deg)} 50%{transform:scale(1.1)rotate(-5deg)} }
+    .lock-title { font-family: var(--font-display); font-size: 1.8rem; font-weight: 800; color: #fff; }
+    .lock-sub { color: var(--text2); font-family: var(--font-text); max-width: 380px; line-height: 1.7; }
+    .lock-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+    /* Mobile responsive */
+    @media (max-width: 1024px) {
+      .playlist-sidebar { width: 280px; }
+      .subject-sidebar { width: 180px; }
+    }
+    @media (max-width: 768px) {
+      .classes-body { flex-direction: column; }
+      .subject-sidebar {
+        width: 100%; height: auto; position: static;
+        flex-direction: row; overflow-x: auto; overflow-y: hidden;
+        border-right: none; border-bottom: 1px solid var(--border);
+        padding: 8px;
+        flex-wrap: nowrap;
+      }
+      .subject-header { display: none; }
+      .subject-item {
+        flex-direction: column; text-align: center;
+        padding: 8px 12px; border-left: none;
+        border-bottom: 3px solid transparent;
+        flex-shrink: 0; min-width: 80px;
+      }
+      .subject-item.active { border-left: none; border-bottom-color: var(--accent); }
+      .subject-name { font-size: 0.72rem; white-space: normal; text-align: center; }
+      .subject-count { display: none; }
+      .playlist-sidebar {
+        width: 100%; height: auto; position: static;
+        border-left: none; border-top: 1px solid var(--border);
+        max-height: 300px;
+      }
+      .classes-topbar { top: 70px; padding: 10px 14px; }
+      .topbar-user { display: none; }
+    }
+  </style>
 </head>
 <body>
-
 <canvas id="particles"></canvas>
 
-<!-- AUTH GUARD OVERLAY -->
+<!-- AUTH GUARD -->
 <div class="locked-overlay" id="lockedOverlay">
   <div class="lock-icon">🔒</div>
   <h2 class="lock-title">Classes Are Locked</h2>
@@ -40,174 +359,239 @@
       <span class="user-greeting">Hello, <span id="userName">Student</span></span>
       <button class="btn-ghost" onclick="logout()">Logout</button>
     </div>
+    <button class="hamburger" id="hamburger">&#9776;</button>
   </div>
 </nav>
 
 <!-- CLASSES PAGE -->
 <div class="classes-page" id="classesPage" style="display:none;">
 
-  <!-- COURSE TABS HEADER -->
-  <div class="classes-header">
-    <span class="classes-title">📚 My Classes</span>
-    <div class="course-selector" id="courseTabs">
-      <!-- filled by JS -->
+  <!-- TOP BAR -->
+  <div class="classes-topbar">
+    <div class="classes-topbar-left">
+      <span class="topbar-title">📚 My Classes</span>
+      <span class="topbar-subject" id="topbarSubject">Select a subject</span>
+    </div>
+    <div class="topbar-user">
+      <span>👋 Hello, <b id="topbarUser">Student</b></span>
+      <button class="btn-ghost" onclick="logout()" style="padding:6px 14px;font-size:0.8rem;">Logout</button>
     </div>
   </div>
 
-  <!-- LAYOUT: VIDEO + SIDEBAR -->
-  <div class="classes-layout">
-    <!-- VIDEO MAIN -->
-    <div class="video-main">
-      <div class="video-player-wrap" id="videoPlayerWrap">
-        <div class="video-placeholder" id="videoPlaceholder">
-          <span>▶️</span>
-          <p style="font-family:var(--font-body);color:var(--text2);font-size:1rem;">Select a class from the list to start watching</p>
+  <!-- BODY: 3 columns -->
+  <div class="classes-body">
+
+    <!-- LEFT: Subject List -->
+    <div class="subject-sidebar" id="subjectSidebar">
+      <div class="subject-header">Subjects</div>
+      <div id="subjectList"><!-- filled by JS --></div>
+    </div>
+
+    <!-- CENTER: Video + Info -->
+    <div class="video-area">
+      <!-- Announcement bar -->
+      <div class="announce-bar">
+        <span class="announce-label">📢 Notice</span>
+        <span class="announce-text" id="announceText">Welcome to ClassNow! New classes are added every week. Stay tuned for updates. 🎓</span>
+      </div>
+
+      <!-- Video player -->
+      <div class="video-wrap">
+        <div class="video-wrap-inner" id="videoWrapInner">
+          <div class="video-placeholder-center" id="videoPlaceholder">
+            <div class="vpc-icon">▶️</div>
+            <div class="vpc-text">Select a subject and lecture to start watching</div>
+            <div class="vpc-sub">ClassNow — Bangladesh's Smart Learning Platform</div>
+          </div>
+          <iframe id="videoIframe" style="display:none; position:absolute; inset:0; width:100%; height:100%;"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen></iframe>
         </div>
-        <iframe
-          id="videoIframe"
-          style="display:none;"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowfullscreen
-        ></iframe>
       </div>
-      <div class="video-info">
-        <div class="video-now-title" id="videoNowTitle">Choose a lecture to begin</div>
-        <div class="video-now-meta" id="videoNowMeta">ClassNow — Bangladesh's Smart Learning Platform</div>
+
+      <!-- Video info -->
+      <div class="video-info-bar">
+        <div class="vid-title" id="vidTitle">Choose a lecture to begin</div>
+        <div class="vid-meta">
+          <span class="vid-badge" id="vidSubjectBadge">ClassNow</span>
+          <span id="vidLecNum">📹 Select a lecture</span>
+          <span id="vidCourseName">ClassNow — Bangladesh's Smart Learning Platform</span>
+        </div>
       </div>
     </div>
 
-    <!-- PLAYLIST SIDEBAR -->
+    <!-- RIGHT: Playlist -->
     <div class="playlist-sidebar">
-      <div class="playlist-header">
-        Course Playlist
-        <div class="playlist-count" id="playlistCount">0 lectures</div>
+      <div class="playlist-top">
+        <div class="playlist-top-title">Course Playlist</div>
+        <div id="playlistCountText" style="font-family:var(--font-text);font-size:0.78rem;color:var(--text3);">0 lectures</div>
+        <div class="playlist-progress">
+          <div class="playlist-progress-fill" id="progressFill" style="width:0%"></div>
+        </div>
+        <div class="playlist-progress-text" id="progressText">0 / 0 watched</div>
       </div>
-      <div class="playlist-list" id="playlistList">
-        <!-- filled by JS -->
+      <div class="playlist-scroll" id="playlistList">
+        <div style="padding:24px;text-align:center;color:var(--text3);font-family:var(--font-body);">
+          👈 Select a subject to see lectures
+        </div>
       </div>
     </div>
-  </div>
 
+  </div>
 </div>
 
 <script src="data.js"></script>
 <script src="app.js"></script>
 <script>
-// ---- AUTH CHECK ----
+let currentCourseId = null;
+let currentVideoIndex = -1;
+let watchedSet = new Set();
+
 document.addEventListener('DOMContentLoaded', () => {
   initParticles();
-  const overlay = document.getElementById('lockedOverlay');
-  const page = document.getElementById('classesPage');
-  const navUser = document.getElementById('navUser');
-  const userNameEl = document.getElementById('userName');
+  initHamburger();
 
-  if (!Auth.isLoggedIn()) {
+  const overlay = document.getElementById('lockedOverlay');
+  const page    = document.getElementById('classesPage');
+
+  if (!Auth.getSession()) {
     overlay.style.display = 'flex';
     page.style.display = 'none';
     return;
   }
 
-  // Logged in
   overlay.style.display = 'none';
   page.style.display = 'flex';
+
   const user = Auth.currentUser();
-  if (userNameEl) userNameEl.textContent = user.name.split(' ')[0];
+  if (user) {
+    document.getElementById('userName').textContent  = user.name.split(' ')[0];
+    document.getElementById('topbarUser').textContent = user.name.split(' ')[0];
+  }
 
-  // Determine active course
-  let activeCourseId = localStorage.getItem('cn_active_course') || COURSES[0].id;
-  // Check if there's a video queued from recent classes
-  const queuedVideo = JSON.parse(localStorage.getItem('cn_play_video') || 'null');
-  if (queuedVideo) localStorage.removeItem('cn_play_video');
+  // Load watched from localStorage
+  const saved = localStorage.getItem('cn_watched');
+  if (saved) watchedSet = new Set(JSON.parse(saved));
 
-  renderCourseTabs(activeCourseId);
-  renderPlaylist(activeCourseId, queuedVideo);
+  buildSubjectList();
+
+  // Restore last course
+  const lastCourse = localStorage.getItem('cn_active_course') || COURSES[0].id;
+  const queued = JSON.parse(localStorage.getItem('cn_play_video') || 'null');
+  if (queued) localStorage.removeItem('cn_play_video');
+
+  selectSubject(lastCourse, queued);
 });
 
-function renderCourseTabs(activeId) {
-  const tabs = document.getElementById('courseTabs');
-  tabs.innerHTML = COURSES.map(c => `
-    <button class="course-tab ${c.id === activeId ? 'active' : ''}"
-      onclick="switchCourse('${c.id}')">
-      ${c.icon} ${c.subject}
-    </button>
+function buildSubjectList() {
+  const list = document.getElementById('subjectList');
+  list.innerHTML = COURSES.map(c => `
+    <div class="subject-item" id="subj-${c.id}" onclick="selectSubject('${c.id}')">
+      <div class="subject-icon" style="background:${c.color}18;">
+        <span style="color:${c.color}">${c.icon}</span>
+      </div>
+      <div class="subject-info">
+        <div class="subject-name">${c.subject}</div>
+        <div class="subject-count">${c.videos.length} lectures</div>
+      </div>
+    </div>
   `).join('');
 }
 
-let currentCourseId = null;
-let currentVideoIndex = -1;
-
-function switchCourse(id) {
-  currentCourseId = id;
-  localStorage.setItem('cn_active_course', id);
-  renderCourseTabs(id);
-  renderPlaylist(id, null);
-  // Clear player
-  setVideo(null, null, -1);
-}
-
-function renderPlaylist(courseId, autoPlay) {
+function selectSubject(courseId, autoPlay) {
   currentCourseId = courseId;
+  localStorage.setItem('cn_active_course', courseId);
+
+  // Update active subject
+  document.querySelectorAll('.subject-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('subj-' + courseId)?.classList.add('active');
+
   const course = COURSES.find(c => c.id === courseId);
   if (!course) return;
 
-  const list = document.getElementById('playlistList');
-  const count = document.getElementById('playlistCount');
-  count.textContent = `${course.videos.length} lecture${course.videos.length !== 1 ? 's' : ''}`;
+  // Update topbar
+  document.getElementById('topbarSubject').textContent = course.subject;
 
-  list.innerHTML = course.videos.map((v, i) => `
-    <div class="playlist-item ${i === 0 && !autoPlay ? '' : ''}" id="pi-${i}" onclick="playVideo(${i})">
-      <div class="playlist-num">${i + 1}</div>
-      <div class="playlist-item-title">${v.title}</div>
-      <div class="playlist-play-icon">▶</div>
-    </div>
-  `).join('');
+  // Build playlist
+  buildPlaylist(course);
 
-  // Auto-play if queued video matches
+  // Auto-play
   if (autoPlay) {
     const idx = course.videos.findIndex(v => v.videoId === autoPlay.videoId);
     if (idx >= 0) { playVideo(idx); return; }
   }
-  // Auto-play first
-  playVideo(0);
+  // Play first unwatched or first
+  const firstUnwatched = course.videos.findIndex((v,i) => !watchedSet.has(courseId+'-'+i));
+  playVideo(firstUnwatched >= 0 ? firstUnwatched : 0);
+}
+
+function buildPlaylist(course) {
+  const list  = document.getElementById('playlistList');
+  const count = document.getElementById('playlistCountText');
+  count.textContent = `${course.videos.length} lecture${course.videos.length !== 1 ? 's' : ''}`;
+
+  list.innerHTML = course.videos.map((v, i) => {
+    const key = course.id + '-' + i;
+    const watched = watchedSet.has(key);
+    return `
+    <div class="playlist-item ${i === currentVideoIndex ? 'active' : ''}" id="pi-${i}" onclick="playVideo(${i})">
+      <div class="pl-num-wrap">
+        <span class="pl-num">${watched ? '✓' : (i+1)}</span>
+        <span class="pl-playing">▶</span>
+      </div>
+      <div class="pl-info">
+        <div class="pl-title">${v.title}</div>
+        <div class="pl-meta">Lecture ${i+1}${watched ? ' · ✅ Watched' : ''}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  updateProgress(course);
 }
 
 function playVideo(index) {
   const course = COURSES.find(c => c.id === currentCourseId);
   if (!course || !course.videos[index]) return;
 
-  // Update active state
+  currentVideoIndex = index;
+
+  // Mark watched
+  const key = currentCourseId + '-' + index;
+  watchedSet.add(key);
+  localStorage.setItem('cn_watched', JSON.stringify([...watchedSet]));
+
+  // Update playlist UI
   document.querySelectorAll('.playlist-item').forEach((el, i) => {
     el.classList.toggle('active', i === index);
   });
-  // Scroll into view
-  const activeEl = document.getElementById(`pi-${index}`);
-  if (activeEl) activeEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  document.getElementById('pi-' + index)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 
-  currentVideoIndex = index;
   const vid = course.videos[index];
-  setVideo(vid.videoId, vid.title, index);
-}
 
-function setVideo(videoId, title, index) {
+  // Update player
   const placeholder = document.getElementById('videoPlaceholder');
-  const iframe = document.getElementById('videoIframe');
-  const titleEl = document.getElementById('videoNowTitle');
-  const metaEl = document.getElementById('videoNowMeta');
-
-  if (!videoId) {
-    placeholder.style.display = 'flex';
-    iframe.style.display = 'none';
-    titleEl.textContent = 'Choose a lecture to begin';
-    metaEl.textContent = 'ClassNow — Bangladesh\'s Smart Learning Platform';
-    return;
-  }
-
+  const iframe      = document.getElementById('videoIframe');
   placeholder.style.display = 'none';
   iframe.style.display = 'block';
-  iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1`;
-  titleEl.textContent = title || 'Now Playing';
-  const course = COURSES.find(c => c.id === currentCourseId);
-  metaEl.textContent = `${course ? course.title : ''} · Lecture ${index + 1}`;
+  iframe.src = `https://www.youtube.com/embed/${vid.videoId}?autoplay=1&rel=0&modestbranding=1`;
+
+  // Update info bar
+  document.getElementById('vidTitle').textContent       = vid.title;
+  document.getElementById('vidSubjectBadge').textContent = course.subject;
+  document.getElementById('vidLecNum').textContent      = `📹 Lecture ${index + 1} of ${course.videos.length}`;
+  document.getElementById('vidCourseName').textContent  = course.title;
+
+  // Rebuild playlist to reflect watched
+  buildPlaylist(course);
+  updateProgress(course);
+}
+
+function updateProgress(course) {
+  const total   = course.videos.length;
+  const watched = course.videos.filter((v,i) => watchedSet.has(course.id+'-'+i)).length;
+  const pct     = total > 0 ? Math.round((watched/total)*100) : 0;
+  document.getElementById('progressFill').style.width  = pct + '%';
+  document.getElementById('progressText').textContent  = `${watched} / ${total} watched`;
 }
 </script>
 </body>
