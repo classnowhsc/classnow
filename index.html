@@ -3,11 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ClassNow</title>
+  <title>ClassNow — Premium HSC Courses</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
   <link rel="shortcut icon" href="favicon.ico" />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
 <body>
 
@@ -115,13 +118,13 @@
           learning environment after signing up.
         </p>
         <div class="about-tags">
-          <span class="tag">HSC Bangla</span>
-          <span class="tag">HSC English</span>
-          <span class="tag">HSC ICT</span>
-          <span class="tag">HSC Physics</span>
-          <span class="tag">HSC Chemistry</span>
-          <span class="tag">HSC Biology</span>
-          <span class="tag">HSC Higher Math</span>
+          <span class="tag tag-link" onclick="goToSubject('hsc-bangla-1st')" title="Watch Bangla Classes">HSC Bangla</span>
+          <span class="tag tag-link" onclick="goToSubject('hsc-english-1st')" title="Watch English Classes">HSC English</span>
+          <span class="tag tag-link" onclick="goToSubject('hsc-ict')" title="Watch ICT Classes">HSC ICT</span>
+          <span class="tag tag-link" onclick="goToSubject('hsc-physics-1st')" title="Watch Physics Classes">HSC Physics</span>
+          <span class="tag tag-link" onclick="goToSubject('hsc-chemistry-1st')" title="Watch Chemistry Classes">HSC Chemistry</span>
+          <span class="tag tag-link" onclick="goToSubject('hsc-biology-1st')" title="Watch Biology Classes">HSC Biology</span>
+          <span class="tag tag-link" onclick="goToSubject('hsc-higher-math-1st')" title="Watch Higher Math Classes">HSC Higher Math</span>
         </div>
       </div>
     </div>
@@ -182,7 +185,7 @@
       <div class="contact-card card-3d">
         <div class="contact-icon">▶️</div>
         <h3>YouTube</h3>
-        <a href="http://www.youtube.com/@classnowhsc" target="_blank" class="contact-link">Class Now</a>
+        <a href="http://www.youtube.com/@classnowhsc" target="_blank" class="contact-link">Class Now Youtube</a>
       </div>
     </div>
     <div class="footer-note">
