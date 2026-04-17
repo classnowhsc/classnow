@@ -847,3 +847,22 @@ body {
   .frb-badge { font-size: 0.75rem; padding: 6px 14px; }
   .frb-cta { font-size: 0.8rem; }
 }
+
+/* ===== CLICKABLE TAGS ===== */
+.tag-link {
+  cursor: pointer !important;
+  position: relative;
+}
+.tag-link:hover {
+  background: rgba(0,198,255,0.15) !important;
+  border-color: var(--accent) !important;
+  transform: translateY(-3px) !important;
+  box-shadow: 0 6px 20px rgba(0,198,255,0.2);
+}
+.tag-link::after {
+  content: ' →';
+  font-size: 0.75rem;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.tag-link:hover::after { opacity: 1; }
