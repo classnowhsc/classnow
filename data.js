@@ -70,11 +70,8 @@ const COURSES = [
     lectures: 5, duration: "20 hrs",
     icon: "🅱", color: "#ff6b35", colorDark: "#cc4400",
     videos: [
-      { title: "Bangla 1st Paper – Kobita: যৌবনের গান ও বিদ্রোহী (Lec 1)", videoId: "PSNvv1z1VBg" },
-      { title: "Bangla 1st Paper – Golpo: Aat Kudi Bochor Aage (Lec 2)", videoId: "dQw4w9WgXcQ" },
-      { title: "Bangla 1st Paper – Kobita: Sonnet (Lec 3)", videoId: "dQw4w9WgXcQ" },
-      { title: "Bangla 1st Paper – Uponnyas: Lalsalu (Lec 4)", videoId: "dQw4w9WgXcQ" },
-      { title: "Bangla 1st Paper – Natak: Siraj ud Daula (Lec 5)", videoId: "dQw4w9WgXcQ" }
+      { title: "Bangla 1st Paper – পদ্য: যৌবনের গান ও বিদ্রোহী (Lec 1)", videoId: "PSNvv1z1VBg" },
+      { title: "Bangla 1st Paper – গদ্য ও পদ্য: সাহিত্যের খেলা ও ঋতু বর্ণন (Lec 2)", videoId: "lFM7_hLmM1I" } 
     ]
   },
   {
@@ -86,11 +83,7 @@ const COURSES = [
     lectures: 5, duration: "20 hrs",
     icon: "🅱", color: "#ff6b35", colorDark: "#cc4400",
     videos: [
-      { title: "Bangla 2nd Paper – Vyakoron: Sandhi (Lec 1)", videoId: "dQw4w9WgXcQ" },
-      { title: "Bangla 2nd Paper – Vyakoron: Karak (Lec 2)", videoId: "dQw4w9WgXcQ" },
-      { title: "Bangla 2nd Paper – Rachana: Borsho (Lec 3)", videoId: "dQw4w9WgXcQ" },
-      { title: "Bangla 2nd Paper – Rachana: Probondho (Lec 4)", videoId: "dQw4w9WgXcQ" },
-      { title: "Bangla 2nd Paper – Patra Lekha (Lec 5)", videoId: "dQw4w9WgXcQ" }
+      { title: "Bangla 2nd Paper – Comming Soon }
     ]
   },
 
@@ -104,11 +97,9 @@ const COURSES = [
     lectures: 5, duration: "20 hrs",
     icon: "E", color: "#00c6ff", colorDark: "#0072b1",
     videos: [
-      { title: "English 1st Paper – Reading Passage (Lec 1)", videoId: "dQw4w9WgXcQ" },
-      { title: "English 1st Paper – Summary Writing (Lec 2)", videoId: "dQw4w9WgXcQ" },
-      { title: "English 1st Paper – Paragraph (Lec 3)", videoId: "dQw4w9WgXcQ" },
-      { title: "English 1st Paper – Composition (Lec 4)", videoId: "dQw4w9WgXcQ" },
-      { title: "English 1st Paper – Letter Writing (Lec 5)", videoId: "dQw4w9WgXcQ" }
+      { title: "English 1st Paper – Reading Passage Unit 6,7 (Lec 1)", videoId: "izTVauapfgI" },
+      { title: "English 1st Paper – Information Transfer & Flow Chart (Lec 2)", videoId: "qraYWQ6_guI" },
+      { title: "English 1st Paper – Modifiers (Lec 3)", videoId: "t9ZnPCd-gM8" }
     ]
   },
   {
@@ -120,11 +111,9 @@ const COURSES = [
     lectures: 5, duration: "20 hrs",
     icon: "E", color: "#00c6ff", colorDark: "#0072b1",
     videos: [
-      { title: "English 2nd Paper – Articles (Lec 1)", videoId: "dQw4w9WgXcQ" },
-      { title: "English 2nd Paper – Prepositions (Lec 2)", videoId: "dQw4w9WgXcQ" },
-      { title: "English 2nd Paper – Narration Change (Lec 3)", videoId: "dQw4w9WgXcQ" },
-      { title: "English 2nd Paper – Voice Change (Lec 4)", videoId: "dQw4w9WgXcQ" },
-      { title: "English 2nd Paper – Modifiers (Lec 5)", videoId: "dQw4w9WgXcQ" }
+      { title: "English 2nd Paper – Right Forms of Verbs (Lec 1)", videoId: "oQXte_tE0Fw" },
+      { title: "English 2nd Paper – Right Forms of Verbs (Lec 2)", videoId: "2oai3CRmb5c" },
+      { title: "English 2nd Paper – Narration (Lec 3)", videoId: "2HyNoD8Mt9g" }
     ]
   },
 
@@ -138,11 +127,10 @@ const COURSES = [
     lectures: 5, duration: "55 hrs",
     icon: "💻", color: "#7c3aed", colorDark: "#4c1d95",
     videos: [
-      { title: "ICT Chapter 1 – Information Technology (Lec 1)", videoId: "dQw4w9WgXcQ" },
-      { title: "ICT Chapter 2 – Communication System (Lec 2)", videoId: "dQw4w9WgXcQ" },
-      { title: "ICT Chapter 3 – Number System (Lec 3)", videoId: "dQw4w9WgXcQ" },
-      { title: "ICT Chapter 4 – Web Design (Lec 4)", videoId: "dQw4w9WgXcQ" },
-      { title: "ICT Chapter 5 – Programming C (Lec 5)", videoId: "dQw4w9WgXcQ" }
+      { title: "ICT Chapter 2 – Communication System (Lec 1)", videoId: "H4GmGpkpNC0" },
+      { title: "ICT Chapter 2 – Communication System (Lec 2)", videoId: "cu84YNa36gk" },
+      { title: "ICT Chapter 3 – Number System (Lec 3)", videoId: "lSK19heHCfA" },
+      { title: "ICT Chapter 3 – Number System (Lec 3)", videoId: "2bY0rgAyrkI" },
     ]
   },
 
