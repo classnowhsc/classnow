@@ -342,7 +342,22 @@ function openClass(id) {
 
 function renderCourses() {
   const grid=document.getElementById('coursesGrid'); if(!grid||!window.COURSES)return;
-  grid.innerHTML=COURSES.map((c,i)=>`
+  grid.innerHTML=COURSES.map((c,i)=>{
+    // FRB special image card
+    if(c.isFRB) return `
+      <div class="course-card frb-card tilt-card reveal reveal-delay-1"
+        onclick="goToClasses()"
+        style="cursor:pointer;">
+        <div class="frb-img-wrap">
+          <img src="${c.image}" alt="${c.title}" loading="lazy"/>
+          <div class="frb-overlay">
+            <span class="frb-badge">🎓 100% FREE</span>
+            <span class="frb-cta">▶ Watch Free Classes →</span>
+          </div>
+        </div>
+      </div>`;
+    // Normal card
+    return `
     <div class="course-card tilt-card reveal reveal-delay-${(i%3)+1}">
       <div class="course-header">
         <div class="course-icon-wrap" style="background:${c.color}18;box-shadow:0 0 20px ${c.color}30;">
@@ -356,8 +371,26 @@ function renderCourses() {
         <div class="price-wrap"><span class="price-orig">৳${c.originalPrice}</span><span class="price-now">৳${c.price}</span><span class="price-currency">BDT</span></div>
         <button class="btn-enroll" style="background:linear-gradient(135deg,${c.color},${c.colorDark});box-shadow:0 6px 20px ${c.color}50;" onclick="enrollCourse('${c.id}')">Enroll Now</button>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
   initTiltCards(); initScrollReveal();
+}
+
+
+function goToSubject(courseId) {
+  if (!Auth.getSession()) {
+    showToast('Please login to watch classes.', 'error');
+    setTimeout(() => location.href = 'login.html', 1100); return;
+  }
+  localStorage.setItem('cn_active_course', courseId);
+  location.href = 'classes.html';
+}
+function goToClasses() {
+  if (!Auth.getSession()) {
+    showToast('Please login to watch classes.', 'error');
+    setTimeout(() => location.href = 'login.html', 1100); return;
+  }
+  location.href = 'classes.html';
 }
 
 function enrollCourse(id) {
