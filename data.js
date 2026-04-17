@@ -46,7 +46,21 @@ const RECENT_CLASSES = [
 ];
 
 const COURSES = [
-  // ── BANGLA ──
+  // ── FREE FRB ──
+  {
+    id: "frb-free",
+    title: "Free FRB Classes for HSC",
+    subject: "FRB Free",
+    description: "100% free HSC classes from FRB — access all subjects and lectures without any cost.",
+    price: 0, originalPrice: 0,
+    lectures: 0, duration: "Free",
+    icon: "🎓", color: "#facc15", colorDark: "#b45309",
+    isFRB: true,
+    image: "frb-course.png",
+    videos: []
+  },
+
+    // ── BANGLA ──
   {
     id: "hsc-bangla-1st",
     title: "HSC Bangla 1st Paper",
