@@ -355,8 +355,10 @@ function renderCourses() {
         onclick="goToClasses()"
         style="cursor:pointer;">
         <div class="frb-img-wrap">
-          <img src="${c.image}" alt="${c.title}" loading="lazy"/>
-          <div class="frb-overlay">
+          <img src="${c.image}" alt="${c.title}" loading="lazy"
+            onerror="this.style.display='none';this.parentNode.querySelector('.frb-fallback').style.display='flex'"/>
+          <div class="frb-fallback" style="display:none;align-items:center;justify-content:center;height:200px;background:linear-gradient(135deg,#1a1200,#2d1f00);font-size:3rem;">🎓</div>
+          <div class="frb-overlay frb-overlay-visible">
             <span class="frb-badge">🎓 100% FREE</span>
             <span class="frb-cta">▶ Watch Free Classes →</span>
           </div>
