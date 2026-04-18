@@ -18,13 +18,19 @@
 
 <nav class="navbar" id="navbar">
   <div class="nav-inner">
-    <div class="nav-logo">
+    <a href="index.html" class="nav-logo" style="text-decoration:none;">
       <img src="logo-nav.png" class="nav-logo-img" alt="ClassNow" />
       <span class="brand">Class<span class="accent">Now</span></span>
+    </a>
+    <div class="nav-auth" id="navAuth" style="margin-left:auto;">
+      <a href="index.html" class="btn-ghost" style="text-decoration:none;">← Home</a>
+      <a href="signup.html" class="btn-primary-sm">Sign Up</a>
     </div>
-    <div style="margin-left:auto;">
-      <a href="index.html" class="btn-ghost" style="text-decoration:none;">← Back to Home</a>
-    </div>
+    <button class="hamburger" id="hamburger">&#9776;</button>
+  </div>
+  <div class="mobile-menu hidden" id="mobileMenu">
+    <a href="index.html">🏠 Home</a>
+    <a href="signup.html" class="mob-signup">Sign Up Free</a>
   </div>
 </nav>
 
@@ -66,6 +72,8 @@
 <script src="data.js"></script>
 <script src="app.js"></script>
 <script>
+  // Init Firebase immediately so db is ready before any button click
+  initFirebase();
   // Redirect if already logged in
   if (Auth.getSession()) window.location.href = 'classes.html';
 
@@ -85,6 +93,13 @@
     }
 
     btn.disabled = true; btn.textContent = 'Logging in…';
+    // Ensure Firebase is ready
+    if (!db) { initFirebase(); await new Promise(r => setTimeout(r, 800)); }
+    if (!db) {
+      errEl.textContent = 'Cannot connect to database. Check your internet.';
+      errEl.style.display = 'block';
+      btn.disabled = false; btn.textContent = 'Login to ClassNow'; return;
+    }
     try {
       const result = await Auth.login(email, password);
       if (result.ok) {
