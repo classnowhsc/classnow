@@ -8,6 +8,9 @@
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
   <link rel="apple-touch-icon" href="logo.png" />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
 <body>
 
@@ -73,9 +76,9 @@
 <script src="data.js"></script>
 <script src="app.js"></script>
 <script>
-  if (Auth.isLoggedIn()) window.location.href = 'classes.html';
+  if (Auth.getSession()) window.location.href = 'classes.html';
 
-  function doSignup() {
+  async function doSignup() {
     const name = document.getElementById('signupName').value.trim();
     const email = document.getElementById('signupEmail').value.trim();
     const password = document.getElementById('signupPassword').value;
@@ -101,8 +104,8 @@
     }
 
     btn.disabled = true; btn.textContent = 'Creating account…';
-    setTimeout(() => {
-      const result = Auth.register(name, email, password);
+    try {
+      const result = await Auth.register(name, email, password);
       if (result.ok) {
         sucEl.textContent = `Account created! Welcome, ${name}! Redirecting…`;
         sucEl.style.display = 'block';
@@ -111,7 +114,11 @@
         errEl.textContent = result.msg; errEl.style.display = 'block';
         btn.disabled = false; btn.textContent = 'Create Free Account';
       }
-    }, 600);
+    } catch(e) {
+      errEl.textContent = 'Connection error. Check your internet and try again.';
+      errEl.style.display = 'block';
+      btn.disabled = false; btn.textContent = 'Create Free Account';
+    }
   }
 
   document.addEventListener('keydown', e => { if (e.key === 'Enter') doSignup(); });
