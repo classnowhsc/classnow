@@ -476,7 +476,7 @@ document.addEventListener('DOMContentLoaded', () => {
   buildSubjectList();
 
   // Restore last course
-  const lastCourse = localStorage.getItem('cn_active_course') || COURSES[0].id;
+  const lastCourse = localStorage.getItem('cn_active_course') || COURSES.find(c => !c.isFRB)?.id || COURSES[0].id;
   const queued = JSON.parse(localStorage.getItem('cn_play_video') || 'null');
   if (queued) localStorage.removeItem('cn_play_video');
 
@@ -485,7 +485,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function buildSubjectList() {
   const list = document.getElementById('subjectList');
-  list.innerHTML = COURSES.map(c => `
+  // Filter out FRB card (no videos) from sidebar
+  list.innerHTML = COURSES.filter(c => !c.isFRB).map(c => `
     <div class="subject-item" id="subj-${c.id}" onclick="selectSubject('${c.id}')">
       <div class="subject-icon" style="background:${c.color}18;">
         <span style="color:${c.color}">${c.icon}</span>
