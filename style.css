@@ -350,7 +350,7 @@ body {
   border: 1px solid var(--border);
   border-radius: 24px; padding: 48px;
   display: flex; gap: 40px; align-items: flex-start;
-  position: relative; overflow: hidden;
+  position: relative; overflow: visible;
 }
 .about-card::before {
   content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
@@ -358,10 +358,12 @@ body {
 }
 .about-card::after {
   content: ''; position: absolute; inset: 0;
+  border-radius: 24px;
   background: radial-gradient(ellipse 60% 60% at 30% 30%, rgba(0,198,255,0.04), transparent);
-  pointer-events: none;
+  pointer-events: none; z-index: 0;
 }
-.about-icon { font-size: 4rem; flex-shrink: 0; filter: drop-shadow(0 0 12px rgba(0,198,255,0.5)); }
+.about-icon { font-size: 4rem; flex-shrink: 0; filter: drop-shadow(0 0 12px rgba(0,198,255,0.5)); position: relative; z-index: 1; }
+.about-text { position: relative; z-index: 1; }
 .about-text h2 { font-family: var(--font-display); font-size: 1.8rem; font-weight: 800; color: #fff; margin-bottom: 16px; }
 .about-text p { font-family: var(--font-text); color: var(--text2); margin-bottom: 16px; line-height: 1.85; font-size: 0.95rem; }
 .about-tags { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
@@ -866,3 +868,21 @@ body {
   transition: opacity 0.2s;
 }
 .tag-link:hover::after { opacity: 1; }
+
+/* ===== FRB OVERLAY ALWAYS VISIBLE ===== */
+.frb-overlay-visible {
+  opacity: 1 !important;
+  background: linear-gradient(to right, rgba(2,8,16,0.6), rgba(2,8,16,0.1) 50%, rgba(2,8,16,0.6)) !important;
+}
+.frb-card:hover .frb-overlay-visible {
+  background: linear-gradient(to right, rgba(2,8,16,0.7), rgba(2,8,16,0.2) 50%, rgba(2,8,16,0.7)) !important;
+}
+
+/* ===== ABOUT CARD BORDER RADIUS FIX (overflow:visible needs manual clip) ===== */
+.about-card {
+  clip-path: none;
+}
+.about-card::before {
+  border-radius: 24px 24px 0 0;
+  overflow: hidden;
+}
