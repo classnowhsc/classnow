@@ -5,43 +5,43 @@
 const RECENT_CLASSES = [
   {
     id: 1,
-    title: "HSC English 2nd Paper – Modifiers (Lec 5)",
-    subject: "HSC English",
-    lecturer: "Aziz",
-    date: "2025-04-08",
-    thumb: "https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
-    videoId: "dQw4w9WgXcQ",
+    title: "Bangla 1st Paper – পদ্য: যৌবনের গান ও বিদ্রোহী (Lec 1)",
+    subject: "HSC Bangla",
+    lecturer: "Nazmul",
+    date: "2025-04-10",
+    thumb: "https://img.youtube.com/vi/PSNvv1z1VBg/hqdefault.jpg",
+    videoId: "PSNvv1z1VBg",
     isNew: true
   },
   {
     id: 2,
-    title: "HSC Bangla – প্রবন্ধ রচনা (Lec 4)",
-    subject: "HSC Bangla",
-    lecturer: "Nazmul",
-    date: "2025-04-05",
-    thumb: "https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
-    videoId: "dQw4w9WgXcQ",
+    title: "English 1st Paper – Reading Passage Unit 6,7 (Lec 1)",
+    subject: "HSC English",
+    lecturer: "Aziz",
+    date: "2025-04-08",
+    thumb: "https://img.youtube.com/vi/izTVauapfgI/hqdefault.jpg",
+    videoId: "izTVauapfgI",
     isNew: true
   },
   {
     id: 3,
-    title: "HSC ICT – Chapter 2: Communication System (Lec 3)",
+    title: "ICT Chapter 2 – Communication System (Lec 1)",
     subject: "HSC ICT",
     lecturer: "Nazmul",
-    date: "2025-04-01",
-    thumb: "https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
-    videoId: "dQw4w9WgXcQ",
-    isNew: false
+    date: "2025-04-06",
+    thumb: "https://img.youtube.com/vi/H4GmGpkpNC0/hqdefault.jpg",
+    videoId: "H4GmGpkpNC0",
+    isNew: true
   },
   {
     id: 4,
-    title: "HSC Higher Math – Integration (Lec 1)",
-    subject: "HSC Higher Math",
-    lecturer: "Nazmul",
-    date: "2025-04-10",
-    thumb: "https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
-    videoId: "dQw4w9WgXcQ",
-    isNew: true
+    title: "English 2nd Paper – Right Forms of Verbs (Lec 1)",
+    subject: "HSC English",
+    lecturer: "Aziz",
+    date: "2025-04-04",
+    thumb: "https://img.youtube.com/vi/oQXte_tE0Fw/hqdefault.jpg",
+    videoId: "oQXte_tE0Fw",
+    isNew: false
   }
 ];
 
