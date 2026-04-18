@@ -93,13 +93,6 @@
     }
 
     btn.disabled = true; btn.textContent = 'Logging in…';
-    // Ensure Firebase is ready
-    if (!db) { initFirebase(); await new Promise(r => setTimeout(r, 800)); }
-    if (!db) {
-      errEl.textContent = 'Cannot connect to database. Check your internet.';
-      errEl.style.display = 'block';
-      btn.disabled = false; btn.textContent = 'Login to ClassNow'; return;
-    }
     try {
       const result = await Auth.login(email, password);
       if (result.ok) {
