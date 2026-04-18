@@ -13,16 +13,15 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
 <body>
-
 <canvas id="particles"></canvas>
 
-<nav class="navbar" id="navbar">
+<nav class="navbar scrolled" id="navbar">
   <div class="nav-inner">
     <a href="index.html" class="nav-logo" style="text-decoration:none;">
       <img src="logo-nav.png" class="nav-logo-img" alt="ClassNow" />
       <span class="brand">Class<span class="accent">Now</span></span>
     </a>
-    <div class="nav-auth" id="navAuth" style="margin-left:auto;">
+    <div class="nav-auth" style="margin-left:auto;">
       <a href="index.html" class="btn-ghost" style="text-decoration:none;">← Home</a>
       <a href="signup.html" class="btn-primary-sm">Sign Up</a>
     </div>
@@ -36,53 +35,46 @@
 
 <div class="auth-page">
   <div class="auth-bg-glow"></div>
-
   <div class="auth-card">
     <div class="auth-logo">
       <img src="logo.png" class="auth-logo-img" alt="ClassNow Logo" />
       <div class="brand" style="font-size:1.6rem;">Class<span class="accent">Now</span></div>
     </div>
-
     <h2 class="auth-title">Welcome Back</h2>
     <p class="auth-sub">Login to access your courses and continue learning.</p>
-
     <div class="form-error" id="loginError"></div>
     <div class="form-success" id="loginSuccess"></div>
-
     <div class="form-group">
       <label for="loginEmail">Email Address</label>
       <input type="email" id="loginEmail" class="form-input" placeholder="you@example.com" autocomplete="email"/>
     </div>
-
     <div class="form-group">
       <label for="loginPassword">Password</label>
       <input type="password" id="loginPassword" class="form-input" placeholder="Enter your password" autocomplete="current-password"/>
     </div>
-
-    <button class="btn-submit" id="loginBtn" onclick="doLogin()">Login to ClassNow</button>
-
+    <button class="btn-submit" id="loginBtn">Login to ClassNow</button>
     <div class="divider"><div class="divider-line"></div><span class="divider-text">OR</span><div class="divider-line"></div></div>
-
-    <p class="auth-switch">
-      Don't have an account? <a href="signup.html">Create one free →</a>
-    </p>
+    <p class="auth-switch">Don't have an account? <a href="signup.html">Create one free →</a></p>
   </div>
 </div>
 
 <script src="data.js"></script>
 <script src="app.js"></script>
 <script>
-  // Init Firebase immediately so db is ready before any button click
+document.addEventListener('DOMContentLoaded', () => {
   initFirebase();
-  // Redirect if already logged in
-  if (Auth.getSession()) window.location.href = 'classes.html';
+  initParticles();
+  initHamburger();
+
+  // Already logged in? go to classes
+  if (Auth.getSession()) { window.location.href = 'classes.html'; return; }
 
   async function doLogin() {
-    const email = document.getElementById('loginEmail').value.trim();
+    const email    = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
-    const errEl = document.getElementById('loginError');
-    const sucEl = document.getElementById('loginSuccess');
-    const btn = document.getElementById('loginBtn');
+    const errEl    = document.getElementById('loginError');
+    const sucEl    = document.getElementById('loginSuccess');
+    const btn      = document.getElementById('loginBtn');
 
     errEl.style.display = 'none';
     sucEl.style.display = 'none';
@@ -92,26 +84,32 @@
       errEl.style.display = 'block'; return;
     }
 
-    btn.disabled = true; btn.textContent = 'Logging in…';
+    btn.disabled = true;
+    btn.textContent = 'Logging in…';
+
     try {
       const result = await Auth.login(email, password);
       if (result.ok) {
-        sucEl.textContent = `Welcome back, ${result.user.name}! Redirecting…`;
+        sucEl.textContent = 'Welcome back, ' + result.user.name + '! Redirecting…';
         sucEl.style.display = 'block';
-        setTimeout(() => { window.location.href = 'classes.html'; }, 1000);
+        setTimeout(() => { window.location.href = 'classes.html'; }, 900);
       } else {
         errEl.textContent = result.msg;
         errEl.style.display = 'block';
-        btn.disabled = false; btn.textContent = 'Login to ClassNow';
+        btn.disabled = false;
+        btn.textContent = 'Login to ClassNow';
       }
     } catch(e) {
-      errEl.textContent = 'Connection error. Check your internet and try again.';
+      errEl.textContent = 'Error: ' + e.message;
       errEl.style.display = 'block';
-      btn.disabled = false; btn.textContent = 'Login to ClassNow';
+      btn.disabled = false;
+      btn.textContent = 'Login to ClassNow';
     }
   }
 
+  document.getElementById('loginBtn').addEventListener('click', doLogin);
   document.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+});
 </script>
 </body>
 </html>
