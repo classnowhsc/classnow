@@ -67,52 +67,57 @@ const Auth = {
   clearSession() { localStorage.removeItem('cn_session'); },
 
   async register(name, email, password) {
-    if (!db) return { ok: false, msg: 'Database not ready. Try again.' };
-    const eKey = this.encodeEmail(email);
-
-    // Check email exists
-    const snap = await db.ref('emailIndex/' + eKey).once('value');
-    if (snap.exists()) return { ok: false, msg: 'Email already registered.' };
-
+    // ── Firebase path ──
+    if (db) {
+      const eKey = this.encodeEmail(email);
+      const snap = await db.ref('emailIndex/' + eKey).once('value');
+      if (snap.exists()) return { ok: false, msg: 'Email already registered.' };
+      const passwordHash = await hashPassword(password);
+      const deviceToken  = genToken();
+      const userId       = 'u_' + Date.now();
+      await db.ref('users/' + userId).set({ name, email: email.toLowerCase(), passwordHash, deviceToken, joinedAt: new Date().toISOString() });
+      await db.ref('emailIndex/' + eKey).set(userId);
+      this.saveSession({ userId, name, email: email.toLowerCase(), deviceToken });
+      return { ok: true };
+    }
+    // ── Local fallback (no Firebase config yet) ──
+    const users = JSON.parse(localStorage.getItem('cn_users') || '{}');
+    const key   = email.toLowerCase();
+    if (users[key]) return { ok: false, msg: 'Email already registered.' };
     const passwordHash = await hashPassword(password);
-    const deviceToken  = genToken();
-    const userId       = 'u_' + Date.now();
-
-    // Save user
-    await db.ref('users/' + userId).set({
-      name, email: email.toLowerCase(),
-      passwordHash, deviceToken,
-      joinedAt: new Date().toISOString()
-    });
-    // Save email index
-    await db.ref('emailIndex/' + eKey).set(userId);
-
-    this.saveSession({ userId, name, email: email.toLowerCase(), deviceToken });
+    const userId = 'u_' + Date.now();
+    users[key] = { userId, name, email: key, passwordHash };
+    localStorage.setItem('cn_users', JSON.stringify(users));
+    this.saveSession({ userId, name, email: key, deviceToken: 'local' });
     return { ok: true };
   },
 
   async login(email, password) {
-    if (!db) return { ok: false, msg: 'Database not ready. Try again.' };
-    const eKey = this.encodeEmail(email);
-
-    // Look up userId by email
-    const idSnap = await db.ref('emailIndex/' + eKey).once('value');
-    if (!idSnap.exists()) return { ok: false, msg: 'Incorrect email or password.' };
-
-    const userId   = idSnap.val();
-    const userSnap = await db.ref('users/' + userId).once('value');
-    if (!userSnap.exists()) return { ok: false, msg: 'Incorrect email or password.' };
-
-    const user         = userSnap.val();
+    // ── Firebase path ──
+    if (db) {
+      const eKey = this.encodeEmail(email);
+      const idSnap = await db.ref('emailIndex/' + eKey).once('value');
+      if (!idSnap.exists()) return { ok: false, msg: 'Incorrect email or password.' };
+      const userId   = idSnap.val();
+      const userSnap = await db.ref('users/' + userId).once('value');
+      if (!userSnap.exists()) return { ok: false, msg: 'Incorrect email or password.' };
+      const user = userSnap.val();
+      const passwordHash = await hashPassword(password);
+      if (user.passwordHash !== passwordHash) return { ok: false, msg: 'Incorrect email or password.' };
+      const deviceToken = genToken();
+      await db.ref('users/' + userId + '/deviceToken').set(deviceToken);
+      this.saveSession({ userId, name: user.name, email: user.email, deviceToken });
+      return { ok: true, user: { name: user.name, email: user.email } };
+    }
+    // ── Local fallback (no Firebase config yet) ──
+    const users = JSON.parse(localStorage.getItem('cn_users') || '{}');
+    const key   = email.toLowerCase();
+    const user  = users[key];
+    if (!user) return { ok: false, msg: 'Incorrect email or password.' };
     const passwordHash = await hashPassword(password);
     if (user.passwordHash !== passwordHash) return { ok: false, msg: 'Incorrect email or password.' };
-
-    // Generate new token → kicks out all other devices
-    const deviceToken = genToken();
-    await db.ref('users/' + userId + '/deviceToken').set(deviceToken);
-
-    this.saveSession({ userId, name: user.name, email: user.email, deviceToken });
-    return { ok: true, user: { name: user.name, email: user.email } };
+    this.saveSession({ userId: user.userId, name: user.name, email: key, deviceToken: 'local' });
+    return { ok: true, user: { name: user.name, email: key } };
   },
 
   async logout() {
