@@ -60,18 +60,18 @@ const COURSES = [
     videos: []
   },
 
-    // ── BANGLA ──
+  // ── BANGLA ──
   {
     id: "hsc-bangla-1st",
     title: "HSC Bangla 1st Paper",
     subject: "Bangla 1st",
     description: "HSC Bangla 1st paper — prose, poetry, and literary analysis.",
     price: 199, originalPrice: 399,
-    lectures: 5, duration: "20 hrs",
+    lectures: 2, duration: "20 hrs",
     icon: "🅱", color: "#ff6b35", colorDark: "#cc4400",
     videos: [
       { title: "Bangla 1st Paper – পদ্য: যৌবনের গান ও বিদ্রোহী (Lec 1)", videoId: "PSNvv1z1VBg" },
-      { title: "Bangla 1st Paper – গদ্য ও পদ্য: সাহিত্যের খেলা ও ঋতু বর্ণন (Lec 2)", videoId: "lFM7_hLmM1I" } 
+      { title: "Bangla 1st Paper – গদ্য ও পদ্য: সাহিত্যের খেলা ও ঋতু বর্ণন (Lec 2)", videoId: "lFM7_hLmM1I" }
     ]
   },
   {
@@ -80,10 +80,10 @@ const COURSES = [
     subject: "Bangla 2nd",
     description: "HSC Bangla 2nd paper — grammar, composition, and writing skills.",
     price: 199, originalPrice: 399,
-    lectures: 5, duration: "20 hrs",
+    lectures: 1, duration: "20 hrs",
     icon: "🅱", color: "#ff6b35", colorDark: "#cc4400",
     videos: [
-      { title: "Bangla 2nd Paper – Comming Soon }
+      { title: "Bangla 2nd Paper – Coming Soon", videoId: "dQw4w9WgXcQ" }
     ]
   },
 
@@ -94,7 +94,7 @@ const COURSES = [
     subject: "English 1st",
     description: "HSC English 1st paper — reading, comprehension, and passages.",
     price: 199, originalPrice: 399,
-    lectures: 5, duration: "20 hrs",
+    lectures: 3, duration: "20 hrs",
     icon: "E", color: "#00c6ff", colorDark: "#0072b1",
     videos: [
       { title: "English 1st Paper – Reading Passage Unit 6,7 (Lec 1)", videoId: "izTVauapfgI" },
@@ -108,7 +108,7 @@ const COURSES = [
     subject: "English 2nd",
     description: "HSC English 2nd paper — grammar, narration, voice, and modifiers.",
     price: 199, originalPrice: 399,
-    lectures: 5, duration: "20 hrs",
+    lectures: 3, duration: "20 hrs",
     icon: "E", color: "#00c6ff", colorDark: "#0072b1",
     videos: [
       { title: "English 2nd Paper – Right Forms of Verbs (Lec 1)", videoId: "oQXte_tE0Fw" },
@@ -124,13 +124,13 @@ const COURSES = [
     subject: "ICT",
     description: "Complete ICT syllabus — all 6 chapters with MCQ, CQ, and practical guidance.",
     price: 399, originalPrice: 799,
-    lectures: 5, duration: "55 hrs",
+    lectures: 4, duration: "55 hrs",
     icon: "💻", color: "#7c3aed", colorDark: "#4c1d95",
     videos: [
       { title: "ICT Chapter 2 – Communication System (Lec 1)", videoId: "H4GmGpkpNC0" },
       { title: "ICT Chapter 2 – Communication System (Lec 2)", videoId: "cu84YNa36gk" },
       { title: "ICT Chapter 3 – Number System (Lec 3)", videoId: "lSK19heHCfA" },
-      { title: "ICT Chapter 3 – Number System (Lec 3)", videoId: "2bY0rgAyrkI" },
+      { title: "ICT Chapter 3 – Number System (Lec 4)", videoId: "2bY0rgAyrkI" }
     ]
   },
 
