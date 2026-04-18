@@ -24,12 +24,18 @@ let db; // Realtime Database reference
 
 function initFirebase() {
   if (typeof firebase === 'undefined') {
-    console.error('Firebase SDK not loaded');
+    console.warn('Firebase SDK not loaded — running in offline mode');
     return false;
   }
-  if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
-  db = firebase.database();
-  return true;
+  try {
+    if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.database();
+    return true;
+  } catch(e) {
+    console.warn('Firebase init failed (config not set?) — running in offline/localStorage mode:', e.message);
+    db = null;
+    return false;
+  }
 }
 
 // ============================================================
@@ -422,8 +428,7 @@ function fmtDate(d) { return new Date(d).toLocaleDateString('en-BD',{day:'numeri
 //  INIT
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
-  initFirebase();
-  checkSessionValidity();
+  // Render UI immediately — never blocked by Firebase
   initNavAuth();
   initHamburger();
   initParticles();
@@ -434,4 +439,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelector('.about-card')?.classList.add('reveal');
   document.querySelectorAll('.contact-card').forEach((el,i)=>el.classList.add('reveal',`reveal-delay-${i+1}`));
   initScrollReveal();
+  // Firebase init async — won't block UI if config missing/invalid
+  initFirebase();
+  checkSessionValidity();
 });
