@@ -46,11 +46,11 @@
     <div class="form-success" id="signupSuccess"></div>
     <div class="form-group">
       <label for="signupName">Full Name</label>
-      <input type="text" id="signupName" class="form-input" placeholder="Your full name" autocomplete="name"/>
+      <input type="text" id="signupName" class="form-input" placeholder="Your full name" autocomplete="name" autocapitalize="words" spellcheck="false"/>
     </div>
     <div class="form-group">
       <label for="signupEmail">Email Address</label>
-      <input type="email" id="signupEmail" class="form-input" placeholder="you@example.com" autocomplete="email"/>
+      <input type="email" id="signupEmail" class="form-input" placeholder="you@example.com" autocomplete="email" autocapitalize="none" autocorrect="off" spellcheck="false" inputmode="email"/>
     </div>
     <div class="form-group">
       <label for="signupPassword">Password</label>
@@ -60,7 +60,7 @@
       <label for="signupConfirm">Confirm Password</label>
       <input type="password" id="signupConfirm" class="form-input" placeholder="Re-enter password" autocomplete="new-password"/>
     </div>
-    <button class="btn-submit" id="signupBtn">Create Free Account</button>
+    <button type="button" class="btn-submit" id="signupBtn">Create Free Account</button>
     <div class="divider"><div class="divider-line"></div><span class="divider-text">OR</span><div class="divider-line"></div></div>
     <p class="auth-switch">Already have an account? <a href="login.html">Login →</a></p>
   </div>
@@ -76,6 +76,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (Auth.getSession()) { window.location.href = 'classes.html'; return; }
 
+  // Scroll focused input into view above mobile keyboard
+  document.querySelectorAll('.form-input').forEach(input => {
+    input.addEventListener('focus', () => {
+      setTimeout(() => input.scrollIntoView({ behavior: 'smooth', block: 'center' }), 320);
+    }, { passive: true });
+  });
+
   async function doSignup() {
     const name     = document.getElementById('signupName').value.trim();
     const email    = document.getElementById('signupEmail').value.trim();
@@ -88,41 +95,66 @@ document.addEventListener('DOMContentLoaded', () => {
     errEl.style.display = 'none';
     sucEl.style.display = 'none';
 
-    if (!name || !email || !password || !confirm) {
-      errEl.textContent = 'Please fill in all fields.'; errEl.style.display = 'block'; return;
-    }
-    if (password.length < 6) {
-      errEl.textContent = 'Password must be at least 6 characters.'; errEl.style.display = 'block'; return;
-    }
-    if (password !== confirm) {
-      errEl.textContent = 'Passwords do not match.'; errEl.style.display = 'block'; return;
-    }
-    if (!/\S+@\S+\.\S+/.test(email)) {
-      errEl.textContent = 'Please enter a valid email.'; errEl.style.display = 'block'; return;
-    }
+    const showErr = msg => {
+      errEl.textContent = msg;
+      errEl.style.display = 'block';
+      errEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    };
+
+    if (!name || !email || !password || !confirm) { showErr('Please fill in all fields.'); return; }
+    if (password.length < 6) { showErr('Password must be at least 6 characters.'); return; }
+    if (password !== confirm) { showErr('Passwords do not match.'); return; }
+    if (!/\S+@\S+\.\S+/.test(email)) { showErr('Please enter a valid email.'); return; }
 
     btn.disabled = true;
     btn.textContent = 'Creating account…';
 
+    const signupTimeout = setTimeout(() => {
+      btn.disabled = false;
+      btn.textContent = 'Create Free Account';
+      showErr('Connection timed out. Please check your internet and try again.');
+    }, 12000);
+
     try {
       const result = await Auth.register(name, email, password);
+      clearTimeout(signupTimeout);
       if (result.ok) {
         sucEl.textContent = 'Account created! Welcome, ' + name + '! Redirecting…';
         sucEl.style.display = 'block';
+        btn.textContent = '✓ Success';
         setTimeout(() => { window.location.href = 'classes.html'; }, 900);
       } else {
-        errEl.textContent = result.msg; errEl.style.display = 'block';
-        btn.disabled = false; btn.textContent = 'Create Free Account';
+        showErr(result.msg);
+        btn.disabled = false;
+        btn.textContent = 'Create Free Account';
       }
     } catch(e) {
-      errEl.textContent = 'Error: ' + e.message;
-      errEl.style.display = 'block';
-      btn.disabled = false; btn.textContent = 'Create Free Account';
+      clearTimeout(signupTimeout);
+      const msg = (e.name === 'TypeError' && e.message.includes('fetch'))
+        ? 'No internet connection. Please try again.'
+        : 'Error: ' + e.message;
+      showErr(msg);
+      btn.disabled = false;
+      btn.textContent = 'Create Free Account';
     }
   }
 
   document.getElementById('signupBtn').addEventListener('click', doSignup);
-  document.addEventListener('keydown', e => { if (e.key === 'Enter') doSignup(); });
+
+  // Enter key: advance through fields, submit on last
+  const fields = ['signupName', 'signupEmail', 'signupPassword', 'signupConfirm'];
+  fields.forEach((id, idx) => {
+    document.getElementById(id).addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (idx < fields.length - 1) {
+          document.getElementById(fields[idx + 1]).focus();
+        } else {
+          doSignup();
+        }
+      }
+    });
+  });
 });
 </script>
 </body>
