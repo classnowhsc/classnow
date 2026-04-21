@@ -24,17 +24,26 @@ let db; // Realtime Database reference
 
 function initFirebase() {
   if (typeof firebase === 'undefined') {
-    console.warn('Firebase SDK not loaded — running in offline mode');
-    return false;
+    console.warn('Firebase SDK not loaded — running in localStorage mode');
+    db = null; return false;
+  }
+  // Guard: if config still has placeholder values, skip Firebase entirely.
+  // firebase.initializeApp() does NOT throw with fake values — it silently
+  // sets db to a broken object that hangs on every .once() call.
+  const cfg = FIREBASE_CONFIG;
+  if (!cfg.apiKey || cfg.apiKey.startsWith('REPLACE_') ||
+      !cfg.databaseURL || cfg.databaseURL.includes('REPLACE_')) {
+    console.info('Firebase config not set — using localStorage auth (single-device mode)');
+    db = null; return false;
   }
   try {
-    if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    if (!firebase.apps.length) firebase.initializeApp(cfg);
     db = firebase.database();
+    console.info('Firebase connected ✓');
     return true;
   } catch(e) {
-    console.warn('Firebase init failed (config not set?) — running in offline/localStorage mode:', e.message);
-    db = null;
-    return false;
+    console.warn('Firebase init error — falling back to localStorage:', e.message);
+    db = null; return false;
   }
 }
 
@@ -356,19 +365,25 @@ function renderCourses() {
   grid.innerHTML=COURSES.map((c,i)=>{
     // FRB special image card
     if(c.isFRB) return `
-      <div class="course-card frb-card tilt-card reveal reveal-delay-1"
-        onclick="goToClasses()"
-        style="cursor:pointer;">
+      <button
+        class="course-card frb-card tilt-card reveal reveal-delay-1"
+        onclick="handleFRBClick(event)"
+        aria-label="Free FRB Classes for HSC — Click to watch free classes"
+        role="button"
+        tabindex="0"
+        style="cursor:pointer;text-align:left;width:100%;border:none;background:none;padding:0;"
+      >
         <div class="frb-img-wrap">
-          <img src="${c.image}" alt="${c.title}" loading="lazy"
-            onerror="this.style.display='none';this.parentNode.querySelector('.frb-fallback').style.display='flex'"/>
-          <div class="frb-fallback" style="display:none;align-items:center;justify-content:center;height:200px;background:linear-gradient(135deg,#1a1200,#2d1f00);font-size:3rem;">🎓</div>
-          <div class="frb-overlay frb-overlay-visible">
+          <img src="${c.image}" alt="Free FRB Classes for HSC — 100% free course banner"
+            loading="lazy"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+          <div class="frb-fallback" style="display:none;align-items:center;justify-content:center;height:200px;background:linear-gradient(135deg,#1a1200,#2d1f00);font-size:3rem;" aria-hidden="true">🎓</div>
+          <div class="frb-overlay frb-overlay-visible" aria-hidden="true">
             <span class="frb-badge">🎓 100% FREE</span>
             <span class="frb-cta">▶ Watch Free Classes →</span>
           </div>
         </div>
-      </div>`;
+      </button>`;
     // Normal card
     return `
     <div class="course-card tilt-card reveal reveal-delay-${(i%3)+1}">
@@ -401,6 +416,19 @@ function goToSubject(courseId) {
 function goToClasses() {
   if (!Auth.getSession()) {
     showToast('Please login to watch classes.', 'error');
+    setTimeout(() => location.href = 'login.html', 1100); return;
+  }
+  location.href = 'classes.html';
+}
+
+// FRB card click — keyboard + mouse accessible
+function handleFRBClick(e) {
+  // Allow keyboard activation (Enter/Space)
+  if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return;
+  e.preventDefault();
+  const session = Auth.getSession();
+  if (!session) {
+    showToast('Please login to watch free classes.', 'error');
     setTimeout(() => location.href = 'login.html', 1100); return;
   }
   location.href = 'classes.html';
