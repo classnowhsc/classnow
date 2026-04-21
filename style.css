@@ -518,7 +518,7 @@ body {
 .form-input {
   width: 100%; padding: 14px 18px; background: var(--bg2); border: 1.5px solid var(--border);
   border-radius: var(--radius-sm); color: var(--text); font-family: var(--font-text);
-  font-size: 0.95rem; transition: var(--transition); outline: none;
+  font-size: 1rem; transition: var(--transition); outline: none; -webkit-tap-highlight-color: transparent;
 }
 .form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,198,255,0.12), 0 0 20px rgba(0,198,255,0.05); }
 .form-input::placeholder { color: var(--text3); }
@@ -804,6 +804,14 @@ body {
   box-shadow: 0 0 30px rgba(250,204,21,0.1) !important;
   overflow: hidden;
   transition: all 0.3s ease;
+  /* Button reset */
+  appearance: none;
+  -webkit-appearance: none;
+  display: block;
+}
+.frb-card:focus {
+  outline: 3px solid rgba(250,204,21,0.7);
+  outline-offset: 3px;
 }
 .frb-card:hover {
   border-color: rgba(250,204,21,0.6) !important;
@@ -885,4 +893,26 @@ body {
 .about-card::before {
   border-radius: 24px 24px 0 0;
   overflow: hidden;
+}
+
+/* ===== MOBILE INPUT / FORM FIXES ===== */
+/* Prevent iOS tap callout on buttons */
+.btn-submit, .btn-ghost, .btn-primary-sm, .btn-hero, .btn-enroll {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;   /* removes 300ms tap delay on iOS < 13 */
+}
+/* Minimum 44px touch target (Apple HIG) on submit button */
+.btn-submit {
+  min-height: 48px;
+}
+/* Prevent password input from being styled oddly on iOS */
+input[type="password"] {
+  -webkit-appearance: none;
+  appearance: none;
+}
+/* Prevent iOS rounding email inputs */
+input[type="email"] {
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: var(--radius-sm);
 }
