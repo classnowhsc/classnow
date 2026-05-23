@@ -50,11 +50,20 @@
     </div>
     <div class="form-group">
       <label for="loginPassword">Password</label>
-      <input type="password" id="loginPassword" class="form-input" placeholder="Enter your password" autocomplete="current-password"/>
+      <div style="position:relative;">
+        <input type="password" id="loginPassword" class="form-input" placeholder="Enter your password" autocomplete="current-password" style="padding-right:52px;"/>
+        <button type="button" id="togglePwd" aria-label="Show/hide password"
+          style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text3);font-size:1.1rem;padding:4px;transition:color 0.2s;">
+          👁
+        </button>
+      </div>
     </div>
     <button type="button" class="btn-submit" id="loginBtn">Login to ClassNow</button>
     <div class="divider"><div class="divider-line"></div><span class="divider-text">OR</span><div class="divider-line"></div></div>
     <p class="auth-switch">Don't have an account? <a href="signup.html">Create one free →</a></p>
+    <p style="text-align:center;margin-top:12px;font-family:var(--font-text);font-size:0.82rem;">
+      <a href="#" id="resetLink" style="color:var(--text3);text-decoration:underline;">Can't login? Reset your account</a>
+    </p>
   </div>
 </div>
 
@@ -68,13 +77,67 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (Auth.getSession()) { window.location.href = 'classes.html'; return; }
 
-  // Scroll focused input into view above mobile keyboard (iOS fix)
+  // ── Show/hide password toggle ──
+  const pwdInput  = document.getElementById('loginPassword');
+  const toggleBtn = document.getElementById('togglePwd');
+  toggleBtn.addEventListener('click', () => {
+    const show = pwdInput.type === 'password';
+    pwdInput.type = show ? 'text' : 'password';
+    toggleBtn.textContent = show ? '🙈' : '👁';
+    pwdInput.focus();
+  });
+
+  // ── Scroll input into view on mobile keyboard open ──
   document.querySelectorAll('.form-input').forEach(input => {
     input.addEventListener('focus', () => {
       setTimeout(() => input.scrollIntoView({ behavior: 'smooth', block: 'center' }), 320);
     }, { passive: true });
   });
 
+  // ── Show warning banner if no accounts exist in this browser ──
+  const storedUsers = JSON.parse(localStorage.getItem('cn_users') || '{}');
+  if (Object.keys(storedUsers).length === 0) {
+    const sub = document.querySelector('.auth-sub');
+    if (sub) sub.innerHTML =
+      'Login to access your courses.<br>' +
+      '<span style="color:#f59e0b;font-size:0.82rem;">⚠️ No accounts found in this browser — ' +
+      '<a href="signup.html" style="color:#f59e0b;font-weight:700;text-decoration:underline;">Sign up first →</a></span>';
+  }
+
+  // ── "Can't login?" self-service reset ──
+  document.getElementById('resetLink').addEventListener('click', e => {
+    e.preventDefault();
+    const emailVal = document.getElementById('loginEmail').value.trim().toLowerCase();
+    if (!emailVal) {
+      alert('Enter your email address first, then click "Can't login?" to reset it.');
+      document.getElementById('loginEmail').focus();
+      return;
+    }
+    const users = JSON.parse(localStorage.getItem('cn_users') || '{}');
+    if (!users[emailVal]) {
+      alert('No account found for ' + emailVal + ' in this browser.
+
+Please sign up first.');
+      return;
+    }
+    const confirmed = confirm(
+      'Reset account for ' + emailVal + '?
+
+' +
+      'This will delete the stored account so you can sign up again with a new password.
+
+' +
+      'Press OK to confirm.'
+    );
+    if (confirmed) {
+      delete users[emailVal];
+      localStorage.setItem('cn_users', JSON.stringify(users));
+      alert('Account removed. You can now sign up again with a new password.');
+      window.location.href = 'signup.html';
+    }
+  });
+
+  // ── Login function ──
   async function doLogin() {
     const email    = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
@@ -88,7 +151,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!email || !password) {
       errEl.textContent = 'Please fill in all fields.';
       errEl.style.display = 'block';
-      // Scroll error into view on mobile
       errEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       return;
     }
@@ -96,7 +158,6 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.disabled = true;
     btn.textContent = 'Logging in…';
 
-    // Timeout: abort after 12s on poor mobile connections
     const loginTimeout = setTimeout(() => {
       btn.disabled = false;
       btn.textContent = 'Login to ClassNow';
@@ -113,7 +174,26 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.textContent = '✓ Success';
         setTimeout(() => { window.location.href = 'classes.html'; }, 900);
       } else {
-        errEl.textContent = result.msg;
+        // Give specific error — distinguish "no account" from "wrong password"
+        const users = JSON.parse(localStorage.getItem('cn_users') || '{}');
+        const key   = email.toLowerCase();
+        if (!users[key]) {
+          errEl.innerHTML =
+            '⚠️ No account found for <b>' + email + '</b> in this browser.<br>' +
+            '<small>Did you sign up on a different device? ' +
+            '<a href="signup.html" style="color:#ff8080;">Sign up again here →</a></small>';
+        } else {
+          errEl.innerHTML =
+            '❌ Wrong password for <b>' + email + '</b>.<br>' +
+            '<small>Use the 👁 button to check what you're typing, or ' +
+            '<a href="#" id="resetInline" style="color:#ff8080;">reset your account</a>.</small>';
+          setTimeout(() => {
+            document.getElementById('resetInline')?.addEventListener('click', e => {
+              e.preventDefault();
+              document.getElementById('resetLink').click();
+            });
+          }, 100);
+        }
         errEl.style.display = 'block';
         errEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         btn.disabled = false;
@@ -121,11 +201,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } catch(e) {
       clearTimeout(loginTimeout);
-      // Network error (no internet, DNS fail, etc.)
-      const msg = (e.name === 'TypeError' && e.message.includes('fetch'))
+      errEl.textContent = (e.name === 'TypeError' && e.message.includes('fetch'))
         ? 'No internet connection. Please try again.'
         : 'Error: ' + e.message;
-      errEl.textContent = msg;
       errEl.style.display = 'block';
       btn.disabled = false;
       btn.textContent = 'Login to ClassNow';
@@ -133,17 +211,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   document.getElementById('loginBtn').addEventListener('click', doLogin);
-
-  // Enter on password field only (not document-wide — avoids mobile keyboard conflicts)
   document.getElementById('loginPassword').addEventListener('keydown', e => {
     if (e.key === 'Enter') { e.preventDefault(); doLogin(); }
   });
-  // Tab from email → focus password
   document.getElementById('loginEmail').addEventListener('keydown', e => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      document.getElementById('loginPassword').focus();
-    }
+    if (e.key === 'Enter') { e.preventDefault(); document.getElementById('loginPassword').focus(); }
   });
 });
 </script>
