@@ -606,5 +606,12 @@ function updateProgress(course) {
   document.getElementById('progressText').textContent  = `${watched} / ${total} watched`;
 }
 </script>
+  <script>
+  firebase.auth().onAuthStateChanged(function(user) {
+    if (!user) {
+      window.location.href = "login.html";
+    }
+  });
+</script>
 </body>
 </html>
