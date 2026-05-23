@@ -1,3 +1,20 @@
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyADIQLu7KTxmtKwqV9f-XfhCZ9ZrxqdYY8",
+  authDomain: "class-now-hsc.firebaseapp.com",
+  projectId: "class-now-hsc",
+  storageBucket: "class-now-hsc.firebasestorage.app",
+  messagingSenderId: "729809726831",
+  appId: "1:729809726831:web:e60fec1c2d54df66010c9a"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
 // ============================================================
 //  APP.JS — Firebase Auth Backend v6
 //  Real cross-device login + last device wins
