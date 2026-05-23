@@ -532,3 +532,8 @@ function login() {
       alert(error.message);
     });
 }
+function logout() {
+  firebase.auth().signOut().then(function () {
+    window.location.href = "login.html";
+  });
+}
