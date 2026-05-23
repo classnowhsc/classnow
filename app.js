@@ -495,3 +495,28 @@ document.addEventListener('DOMContentLoaded', () => {
   initFirebase();
   checkSessionValidity();
 });
+function signup() {
+  var email = document.getElementById("email").value;
+  var password = document.getElementById("password").value;
+
+  if (email === "" || password === "") {
+    alert("Email এবং Password লিখতে হবে");
+    return;
+  }
+
+  firebase.auth().createUserWithEmailAndPassword(email, password)
+    .then(function(userCredential) {
+      var user = userCredential.user;
+
+      firebase.database().ref("users/" + user.uid).set({
+        email: email,
+        role: "student"
+      });
+
+      alert("Account তৈরি হয়েছে");
+      window.location.href = "login.html";
+    })
+    .catch(function(error) {
+      alert(error.message);
+    });
+}
