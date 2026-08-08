@@ -461,14 +461,17 @@ let currentCourseId = null;
 let currentVideoIndex = -1;
 let watchedSet = new Set();
 
-document.addEventListener('DOMContentLoaded', () => {
+
+  document.addEventListener('DOMContentLoaded', async () => {
   initParticles();
   initHamburger();
 
   const overlay = document.getElementById('lockedOverlay');
   const page    = document.getElementById('classesPage');
 
-  if (!Auth.getSession()) {
+  const user = await waitForAuthState();
+
+  if (!user) {
     overlay.style.display = 'flex';
     page.style.display = 'none';
     return;
@@ -477,12 +480,10 @@ document.addEventListener('DOMContentLoaded', () => {
   overlay.style.display = 'none';
   page.style.display = 'flex';
 
-  const user = Auth.currentUser();
-  if (user) {
-    document.getElementById('userName').textContent  = user.name.split(' ')[0];
-    document.getElementById('topbarUser').textContent = user.name.split(' ')[0];
-  }
+  const firstName = (user.displayName || user.email?.split('@')[0] || 'Student').split(' ')[0];
 
+  document.getElementById('userName').textContent = firstName;
+  document.getElementById('topbarUser').textContent = firstName;
   // Load watched from localStorage
   const saved = localStorage.getItem('cn_watched');
   if (saved) watchedSet = new Set(JSON.parse(saved));
@@ -608,13 +609,5 @@ function updateProgress(course) {
   document.getElementById('progressFill').style.width  = pct + '%';
   document.getElementById('progressText').textContent  = `${watched} / ${total} watched`;
 }
-</script>
-  <script>
-  firebase.auth().onAuthStateChanged(function(user) {
-    if (!user) {
-      window.location.href = "login.html";
-    }
-  });
-</script>
 </body>
 </html>
