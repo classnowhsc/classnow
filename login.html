@@ -66,13 +66,18 @@
 
 <script src="data.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', async () => {
-  initFirebase();
-  await waitForAuthState();
+document.addEventListener('DOMContentLoaded', () => {
+  // Initialize Firebase, but do not block the page waiting for auth state.
+  // The previous version awaited auth state before attaching button handlers,
+  // which could leave Login completely unresponsive if Firebase was delayed.
+  const firebaseReady = initFirebase();
   initParticles();
   initHamburger();
 
-  if (Auth.getSession()) { window.location.href = 'classes.html'; return; }
+  if (firebaseReady && Auth.getSession()) {
+    window.location.href = 'classes.html';
+    return;
+  }
 
   const pwdInput = document.getElementById('loginPassword');
   const toggleBtn = document.getElementById('togglePwd');
@@ -98,7 +103,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
     try {
-      initFirebase();
+      if (!initFirebase() || !firebaseAuth) throw new Error('Firebase Authentication is unavailable.');
       await firebaseAuth.sendPasswordResetEmail(email);
       alert('Password reset email sent. Please check your inbox and follow the instructions.');
     } catch (error) {
