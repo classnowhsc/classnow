@@ -8,21 +8,10 @@
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
   <link rel="apple-touch-icon" href="logo.png" />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
-  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="app.js"></script>
 </head>
-  <!-- Firebase Core -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-
-<!-- Firebase Authentication -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-
-<!-- Firebase Realtime Database -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
-<!-- Your Main JS -->
-<script src="app.js"></script>
 <body>
 <canvas id="particles"></canvas>
 
@@ -67,16 +56,14 @@
       <label for="signupPassword">Password</label>
       <div style="position:relative;">
         <input type="password" id="signupPassword" class="form-input" placeholder="Min. 6 characters" autocomplete="new-password" style="padding-right:52px;"/>
-        <button type="button" id="togglePwd1" aria-label="Show/hide password"
-          style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text3);font-size:1.1rem;padding:4px;line-height:1;">👁</button>
+        <button type="button" id="togglePwd1" aria-label="Show/hide password" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text3);font-size:1.1rem;padding:4px;line-height:1;">👁</button>
       </div>
     </div>
     <div class="form-group">
       <label for="signupConfirm">Confirm Password</label>
       <div style="position:relative;">
         <input type="password" id="signupConfirm" class="form-input" placeholder="Re-enter password" autocomplete="new-password" style="padding-right:52px;"/>
-        <button type="button" id="togglePwd2" aria-label="Show/hide confirm password"
-          style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text3);font-size:1.1rem;padding:4px;line-height:1;">👁</button>
+        <button type="button" id="togglePwd2" aria-label="Show/hide confirm password" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text3);font-size:1.1rem;padding:4px;line-height:1;">👁</button>
       </div>
     </div>
     <button type="button" class="btn-submit" id="signupBtn">Create Free Account</button>
@@ -86,16 +73,15 @@
 </div>
 
 <script src="data.js"></script>
-<script src="app.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   initFirebase();
+  await waitForAuthState();
   initParticles();
   initHamburger();
 
   if (Auth.getSession()) { window.location.href = 'classes.html'; return; }
 
-  // Scroll focused input into view above mobile keyboard
   document.querySelectorAll('.form-input').forEach(input => {
     input.addEventListener('focus', () => {
       setTimeout(() => input.scrollIntoView({ behavior: 'smooth', block: 'center' }), 320);
@@ -103,13 +89,13 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   async function doSignup() {
-    const name     = document.getElementById('signupName').value.trim();
-    const email    = document.getElementById('signupEmail').value.trim();
+    const name = document.getElementById('signupName').value.trim();
+    const email = document.getElementById('signupEmail').value.trim();
     const password = document.getElementById('signupPassword').value;
-    const confirm  = document.getElementById('signupConfirm').value;
-    const errEl    = document.getElementById('signupError');
-    const sucEl    = document.getElementById('signupSuccess');
-    const btn      = document.getElementById('signupBtn');
+    const confirm = document.getElementById('signupConfirm').value;
+    const errEl = document.getElementById('signupError');
+    const sucEl = document.getElementById('signupSuccess');
+    const btn = document.getElementById('signupBtn');
 
     errEl.style.display = 'none';
     sucEl.style.display = 'none';
@@ -128,37 +114,26 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.disabled = true;
     btn.textContent = 'Creating account…';
 
-    const signupTimeout = setTimeout(() => {
-      btn.disabled = false;
-      btn.textContent = 'Create Free Account';
-      showErr('Connection timed out. Please check your internet and try again.');
-    }, 12000);
-
     try {
       const result = await Auth.register(name, email, password);
-      clearTimeout(signupTimeout);
       if (result.ok) {
         sucEl.textContent = 'Account created! Welcome, ' + name + '! Redirecting…';
         sucEl.style.display = 'block';
         btn.textContent = '✓ Success';
-        setTimeout(() => { window.location.href = 'classes.html'; }, 900);
+        setTimeout(() => { window.location.href = 'classes.html'; }, 700);
       } else {
         showErr(result.msg);
         btn.disabled = false;
         btn.textContent = 'Create Free Account';
       }
-    } catch(e) {
-      clearTimeout(signupTimeout);
-      const msg = (e.name === 'TypeError' && e.message.includes('fetch'))
-        ? 'No internet connection. Please try again.'
-        : 'Error: ' + e.message;
-      showErr(msg);
+    } catch (error) {
+      console.error(error);
+      showErr('Unable to create your account right now. Please try again.');
       btn.disabled = false;
       btn.textContent = 'Create Free Account';
     }
   }
 
-  // Show/hide password toggles
   [['togglePwd1','signupPassword'],['togglePwd2','signupConfirm']].forEach(([btnId, inputId]) => {
     document.getElementById(btnId).addEventListener('click', () => {
       const inp = document.getElementById(inputId);
@@ -171,17 +146,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('signupBtn').addEventListener('click', doSignup);
 
-  // Enter key: advance through fields, submit on last
   const fields = ['signupName', 'signupEmail', 'signupPassword', 'signupConfirm'];
   fields.forEach((id, idx) => {
     document.getElementById(id).addEventListener('keydown', e => {
       if (e.key === 'Enter') {
         e.preventDefault();
-        if (idx < fields.length - 1) {
-          document.getElementById(fields[idx + 1]).focus();
-        } else {
-          doSignup();
-        }
+        if (idx < fields.length - 1) document.getElementById(fields[idx + 1]).focus();
+        else doSignup();
       }
     });
   });
