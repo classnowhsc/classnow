@@ -74,13 +74,16 @@
 
 <script src="data.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', async () => {
-  initFirebase();
-  await waitForAuthState();
+document.addEventListener('DOMContentLoaded', () => {
+  // Initialize Firebase without blocking event-handler registration.
+  const firebaseReady = initFirebase();
   initParticles();
   initHamburger();
 
-  if (Auth.getSession()) { window.location.href = 'classes.html'; return; }
+  if (firebaseReady && Auth.getSession()) {
+    window.location.href = 'classes.html';
+    return;
+  }
 
   document.querySelectorAll('.form-input').forEach(input => {
     input.addEventListener('focus', () => {
@@ -115,6 +118,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     btn.textContent = 'Creating account…';
 
     try {
+      if (!firebaseReady || !firebaseAuth) {
+        showErr('Firebase Authentication could not be loaded. Please refresh and try again.');
+        btn.disabled = false;
+        btn.textContent = 'Create Free Account';
+        return;
+      }
       const result = await Auth.register(name, email, password);
       if (result.ok) {
         sucEl.textContent = 'Account created! Welcome, ' + name + '! Redirecting…';
