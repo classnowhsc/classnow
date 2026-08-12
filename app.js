@@ -28,12 +28,37 @@ function initFirebase() {
       : firebase.initializeApp(FIREBASE_CONFIG);
     firebaseAuth = firebase.auth();
 
-    if (!authStatePromise) {
+if (!authStatePromise) {
   authStatePromise = new Promise(resolve => {
-    firebaseAuth.onAuthStateChanged(user => {
+    // If Firebase already restored the session, use it immediately.
+    if (firebaseAuth.currentUser) {
       authStateReady = true;
+      resolve(firebaseAuth.currentUser);
+      return;
+    }
+
+    let settled = false;
+
+    const finish = (user) => {
+      if (settled) return;
+      settled = true;
+      authStateReady = true;
+      unsubscribe();
+      clearTimeout(timeout);
       resolve(user);
+    };
+
+    const unsubscribe = firebaseAuth.onAuthStateChanged(user => {
+      // If a logged-in user appears, unlock immediately.
+      if (user) {
+        finish(user);
+      }
     });
+
+    // Give Firebase a little time to restore persisted login state.
+    const timeout = setTimeout(() => {
+      finish(firebaseAuth.currentUser || null);
+    }, 3000);
   });
 }
 
