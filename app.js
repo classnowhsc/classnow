@@ -29,14 +29,13 @@ function initFirebase() {
     firebaseAuth = firebase.auth();
 
     if (!authStatePromise) {
-      authStatePromise = new Promise(resolve => {
-        const unsubscribe = firebaseAuth.onAuthStateChanged(user => {
-          authStateReady = true;
-          unsubscribe();
-          resolve(user);
-        });
-      });
-    }
+  authStatePromise = new Promise(resolve => {
+    firebaseAuth.onAuthStateChanged(user => {
+      authStateReady = true;
+      resolve(user);
+    });
+  });
+}
 
     return true;
   } catch (error) {
