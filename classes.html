@@ -759,28 +759,54 @@ let currentVideoIndex = -1;
 let watchedSet = new Set();
 
 
-  document.addEventListener('DOMContentLoaded', async () => {
+  document.addEventListener('DOMContentLoaded', () => {
   initParticles();
   initHamburger();
 
   const overlay = document.getElementById('lockedOverlay');
-  const page    = document.getElementById('classesPage');
+  const page = document.getElementById('classesPage');
 
-  const user = await waitForAuthState();
+  firebase.auth().onAuthStateChanged(async (user) => {
 
-  if (!user) {
-    overlay.style.display = 'flex';
-    page.style.display = 'none';
-    return;
-  }
+    if (!user) {
+      overlay.style.display = 'flex';
+      page.style.display = 'none';
+      return;
+    }
 
-  overlay.style.display = 'none';
-  page.style.display = 'flex';
+    // User is authenticated — unlock page
+    overlay.style.display = 'none';
+    page.style.display = 'flex';
 
-  const firstName = (user.displayName || user.email?.split('@')[0] || 'Student').split(' ')[0];
+    const firstName =
+      (user.displayName || user.email?.split('@')[0] || 'Student')
+        .split(' ')[0];
 
-  document.getElementById('userName').textContent = firstName;
-  document.getElementById('topbarUser').textContent = firstName;
+    document.getElementById('userName').textContent = firstName;
+    document.getElementById('topbarUser').textContent = firstName;
+
+    // Load watched from localStorage
+    const saved = localStorage.getItem('cn_watched');
+    if (saved) watchedSet = new Set(JSON.parse(saved));
+
+    buildSubjectList();
+
+    // Restore last course
+    const lastCourse =
+      localStorage.getItem('cn_active_course') ||
+      COURSES.find(c => !c.isFRB)?.id ||
+      COURSES[0].id;
+
+    const queued =
+      JSON.parse(localStorage.getItem('cn_play_video') || 'null');
+
+    if (queued) {
+      localStorage.removeItem('cn_play_video');
+    }
+
+    selectSubject(lastCourse, queued);
+  });
+});
   // Load watched from localStorage
   const saved = localStorage.getItem('cn_watched');
   if (saved) watchedSet = new Set(JSON.parse(saved));
