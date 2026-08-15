@@ -533,7 +533,4 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.querySelectorAll('.contact-card').forEach((el, i) => el.classList.add('reveal', `reveal-delay-${i + 1}`));
   initScrollReveal();
 
-  if (window.location.pathname.includes('classes.html')) {
-    await checkSessionValidity();
-  }
 });
