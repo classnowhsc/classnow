@@ -22,7 +22,6 @@
 
   <!-- Firebase SDK — LOAD EACH ONCE -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
   <style>
@@ -766,46 +765,35 @@ let watchedSet = new Set();
   const overlay = document.getElementById('lockedOverlay');
   const page = document.getElementById('classesPage');
 
-  firebase.auth().onAuthStateChanged(async (user) => {
+  // Use localStorage session (Auth from app.js) — Firebase Auth not configured
+  const session = Auth.getSession();
 
-    if (!user) {
-      overlay.style.display = 'flex';
-      page.style.display = 'none';
-      return;
-    }
+  if (!session) {
+    overlay.style.display = 'flex';
+    page.style.display = 'none';
+  } else {
+    overlay.style.display = 'none';
+    page.style.display = 'flex';
 
-// User is authenticated — unlock page
-overlay.style.display = 'none';
-page.style.display = 'flex';
+    const firstName = (session.name || session.email || 'Student').split(' ')[0];
+    document.getElementById('userName').textContent  = firstName;
+    document.getElementById('topbarUser').textContent = firstName;
 
-const firstName =
-  (user.displayName || user.email?.split('@')[0] || 'Student')
-    .split(' ')[0];
+    const saved = localStorage.getItem('cn_watched');
+    if (saved) watchedSet = new Set(JSON.parse(saved));
 
-document.getElementById('userName').textContent = firstName;
-document.getElementById('topbarUser').textContent = firstName;
+    buildSubjectList();
 
-// Load watched from localStorage
-const saved = localStorage.getItem('cn_watched');
-if (saved) watchedSet = new Set(JSON.parse(saved));
+    const lastCourse =
+      localStorage.getItem('cn_active_course') ||
+      COURSES.find(c => !c.isFRB)?.id ||
+      COURSES[0].id;
 
-buildSubjectList();
+    const queued = JSON.parse(localStorage.getItem('cn_play_video') || 'null');
+    if (queued) localStorage.removeItem('cn_play_video');
 
-// Restore last course
-const lastCourse =
-  localStorage.getItem('cn_active_course') ||
-  COURSES.find(c => !c.isFRB)?.id ||
-  COURSES[0].id;
-
-const queued =
-  JSON.parse(localStorage.getItem('cn_play_video') || 'null');
-
-if (queued) {
-  localStorage.removeItem('cn_play_video');
-}
-
-selectSubject(lastCourse, queued);
-  });
+    selectSubject(lastCourse, queued);
+  }
 });
 
 
