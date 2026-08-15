@@ -507,57 +507,6 @@
       margin-top: 3px;
     }
 
-    /* Auth overlay */
-    .locked-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(2,8,16,0.97);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 999;
-      flex-direction: column;
-      gap: 24px;
-      text-align: center;
-      padding: 24px;
-      backdrop-filter: blur(10px);
-    }
-
-    .lock-icon {
-      font-size: 5rem;
-      animation: lockPulse 2s ease-in-out infinite;
-    }
-
-    @keyframes lockPulse {
-      0%,100% {
-        transform: scale(1) rotate(0deg);
-      }
-      50% {
-        transform: scale(1.1) rotate(-5deg);
-      }
-    }
-
-    .lock-title {
-      font-family: var(--font-display);
-      font-size: 1.8rem;
-      font-weight: 800;
-      color: #fff;
-    }
-
-    .lock-sub {
-      color: var(--text2);
-      font-family: var(--font-text);
-      max-width: 380px;
-      line-height: 1.7;
-    }
-
-    .lock-buttons {
-      display: flex;
-      gap: 16px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
     /* Mobile responsive */
     @media (max-width: 1024px) {
       .playlist-sidebar {
@@ -641,17 +590,6 @@
     <button onclick="logout()">Logout</button>
   </div>
 <canvas id="particles"></canvas>
-
-<!-- AUTH GUARD -->
-<div class="locked-overlay" id="lockedOverlay">
-  <div class="lock-icon">🔒</div>
-  <h2 class="lock-title">Classes Are Locked</h2>
-  <p class="lock-sub">You need to be logged in to access the course videos. Join ClassNow for free to start learning!</p>
-  <div class="lock-buttons">
-    <a href="login.html" class="btn-hero">Login</a>
-    <a href="signup.html" class="btn-hero-outline">Sign Up Free</a>
-  </div>
-</div>
 
 <!-- NAVBAR -->
 <nav class="navbar scrolled" id="navbar">
@@ -758,42 +696,32 @@ let currentVideoIndex = -1;
 let watchedSet = new Set();
 
 
-  document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
   initParticles();
   initHamburger();
 
-  const overlay = document.getElementById('lockedOverlay');
-  const page = document.getElementById('classesPage');
-
-  // Use localStorage session (Auth from app.js) — Firebase Auth not configured
+  // Classes page is directly accessible. Authentication is handled by Firebase
+  // for the rest of the site, but this page no longer blocks access with a lock overlay.
   const session = Auth.getSession();
+  const firstName = session?.name || session?.email?.split('@')[0] || 'Student';
 
-  if (!session) {
-    overlay.style.display = 'flex';
-    page.style.display = 'none';
-  } else {
-    overlay.style.display = 'none';
-    page.style.display = 'flex';
+  document.getElementById('userName').textContent = firstName.split(' ')[0];
+  document.getElementById('topbarUser').textContent = firstName.split(' ')[0];
 
-    const firstName = (session.name || session.email || 'Student').split(' ')[0];
-    document.getElementById('userName').textContent  = firstName;
-    document.getElementById('topbarUser').textContent = firstName;
+  const saved = localStorage.getItem('cn_watched');
+  if (saved) watchedSet = new Set(JSON.parse(saved));
 
-    const saved = localStorage.getItem('cn_watched');
-    if (saved) watchedSet = new Set(JSON.parse(saved));
+  buildSubjectList();
 
-    buildSubjectList();
+  const lastCourse =
+    localStorage.getItem('cn_active_course') ||
+    COURSES.find(c => !c.isFRB)?.id ||
+    COURSES[0].id;
 
-    const lastCourse =
-      localStorage.getItem('cn_active_course') ||
-      COURSES.find(c => !c.isFRB)?.id ||
-      COURSES[0].id;
+  const queued = JSON.parse(localStorage.getItem('cn_play_video') || 'null');
+  if (queued) localStorage.removeItem('cn_play_video');
 
-    const queued = JSON.parse(localStorage.getItem('cn_play_video') || 'null');
-    if (queued) localStorage.removeItem('cn_play_video');
-
-    selectSubject(lastCourse, queued);
-  }
+  selectSubject(lastCourse, queued);
 });
 
 
@@ -908,5 +836,6 @@ function updateProgress(course) {
   document.getElementById('progressFill').style.width  = pct + '%';
   document.getElementById('progressText').textContent  = `${watched} / ${total} watched`;
 }
+</script>
 </body>
 </html>
